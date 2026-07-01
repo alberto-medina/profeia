@@ -296,6 +296,13 @@ Flujo alumno:
   obligatorios en la pantalla inicial, se elimina el default "Matematica" y el
   backend puede corregir la materia por palabras clave (por ejemplo futbol,
   pases o tiros -> Educacion Fisica).
+- Se ordeno la busqueda de imagenes gratuitas con mas filtros por materia,
+  tema y palabras clave para evitar recursos incoherentes; si no encuentra una
+  imagen confiable, avisa y usa fallback local sin costo.
+- Se alineo el flujo de exportacion con la vista alumno: PDF y ZIP usan los
+  mismos bloques centrales de la clase, incorporan recursos locales cuando
+  estan disponibles y el manifiesto del ZIP indica el archivo interno de cada
+  recurso.
 
 ## Matriz de IA recomendada
 

@@ -196,6 +196,15 @@ def _crear_paginas_recursos_imagen(recursos: list[dict]) -> list[Image.Image]:
     return paginas
 
 
+def _nombre_recurso_zip(recurso: dict, indice: int) -> str | None:
+    ruta_recurso = Path(str(recurso.get("url_storage") or ""))
+    if not ruta_recurso.exists() or not ruta_recurso.is_file():
+        return None
+    extension = ruta_recurso.suffix or ".bin"
+    tipo = str(recurso.get("tipo") or "recurso")
+    return f"recursos/{indice:02d}-{tipo}{extension}"
+
+
 def _crear_pdf_con_imagenes(
     ruta_pdf: Path,
     contenido_json: dict,
@@ -592,6 +601,17 @@ async def exportar_paquete_zip(
     RUTA_EXPORTACIONES.mkdir(parents=True, exist_ok=True)
     ruta_zip = RUTA_EXPORTACIONES / f"{clase_id}.zip"
 
+    recursos_manifest = []
+    for indice, recurso in enumerate(recursos, start=1):
+        recursos_manifest.append(
+            {
+                "tipo": recurso.get("tipo"),
+                "url_storage": recurso.get("url_storage"),
+                "archivo_zip": _nombre_recurso_zip(recurso, indice),
+                "metadata_json": recurso.get("metadata_json") or {},
+            }
+        )
+
     manifiesto = {
         "clase_id": str(clase_id),
         "codigo_publico": codigo_publico,
@@ -603,14 +623,7 @@ async def exportar_paquete_zip(
             "pdf": "clase.pdf" if ruta_pdf else None,
             "powerpoint": "clase.pptx" if ruta_pptx else None,
         },
-        "recursos": [
-            {
-                "tipo": recurso.get("tipo"),
-                "url_storage": recurso.get("url_storage"),
-                "metadata_json": recurso.get("metadata_json") or {},
-            }
-            for recurso in recursos
-        ],
+        "recursos": recursos_manifest,
     }
 
     readme = (
@@ -638,8 +651,9 @@ async def exportar_paquete_zip(
             ruta_resuelta = str(ruta_recurso.resolve())
             if ruta_resuelta in rutas_agregadas:
                 continue
-            extension = ruta_recurso.suffix or ".bin"
-            nombre = f"recursos/{indice:02d}-{recurso.get('tipo', 'recurso')}{extension}"
+            nombre = _nombre_recurso_zip(recurso, indice)
+            if not nombre:
+                continue
             archivo_zip.write(ruta_recurso, nombre)
             rutas_agregadas.add(ruta_resuelta)
 

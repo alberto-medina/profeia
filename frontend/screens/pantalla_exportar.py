@@ -18,6 +18,11 @@ from utils import cliente_api
 class PantallaExportar(Screen):
     """Genera y entrega los archivos finales de la clase."""
 
+    def _hay_recursos_para_paquete(self) -> bool:
+        app = MDApp.get_running_app()
+        recursos = app.estado.recursos_generados or {}
+        return any(clave not in {"pdf", "pptx", "zip"} for clave in recursos)
+
     def _texto_compartir_codigo(self) -> str:
         app = MDApp.get_running_app()
         codigo = app.estado.codigo_publico or ""
@@ -68,13 +73,18 @@ class PantallaExportar(Screen):
         ruta_pdf = Path(recurso_generado.get("url_storage", ""))
         self._ruta_pdf_generado = ruta_pdf
         self._ruta_exportacion_generada = ruta_pdf
-        self.ids.etiqueta_estado_pdf.text = "PDF listo."
+        if self._hay_recursos_para_paquete():
+            self.ids.etiqueta_estado_pdf.text = "PDF listo con recursos visuales disponibles."
+        else:
+            self.ids.etiqueta_estado_pdf.text = "PDF listo."
         self.ids.boton_abrir_carpeta_pdf.opacity = 1
         self.ids.boton_abrir_carpeta_pdf.disabled = False
 
     def _al_exportar_pdf_error(self, error):
         self.ids.boton_exportar_pdf.disabled = False
-        self.ids.etiqueta_estado_pdf.text = cliente_api.mensaje_error(error)
+        self.ids.etiqueta_estado_pdf.text = (
+            f"{cliente_api.mensaje_error(error)}. Podes volver a intentar."
+        )
         print(f"[PantallaExportar] error PDF: {error}")
 
     def al_presionar_abrir_carpeta_pdf(self):
@@ -114,7 +124,9 @@ class PantallaExportar(Screen):
 
     def _al_exportar_pptx_error(self, error):
         self.ids.boton_exportar_pptx.disabled = False
-        self.ids.etiqueta_estado_pptx.text = cliente_api.mensaje_error(error)
+        self.ids.etiqueta_estado_pptx.text = (
+            f"{cliente_api.mensaje_error(error)}. Podes volver a intentar."
+        )
         print(f"[PantallaExportar] error PPTX: {error}")
 
     def al_presionar_exportar_zip(self):
@@ -138,13 +150,18 @@ class PantallaExportar(Screen):
         self.ids.boton_exportar_zip.disabled = False
         ruta_zip = Path(recurso_generado.get("url_storage", ""))
         self._ruta_exportacion_generada = ruta_zip
-        self.ids.etiqueta_estado_zip.text = "Paquete ZIP listo."
+        if self._hay_recursos_para_paquete():
+            self.ids.etiqueta_estado_zip.text = "Paquete ZIP listo con recursos disponibles."
+        else:
+            self.ids.etiqueta_estado_zip.text = "Paquete ZIP listo."
         self.ids.boton_abrir_carpeta_pdf.opacity = 1
         self.ids.boton_abrir_carpeta_pdf.disabled = False
 
     def _al_exportar_zip_error(self, error):
         self.ids.boton_exportar_zip.disabled = False
-        self.ids.etiqueta_estado_zip.text = cliente_api.mensaje_error(error)
+        self.ids.etiqueta_estado_zip.text = (
+            f"{cliente_api.mensaje_error(error)}. Podes volver a intentar."
+        )
         print(f"[PantallaExportar] error ZIP: {error}")
 
     def al_presionar_editar_clase(self):

@@ -29,7 +29,7 @@
 - [x] T001 Review current generation flow in `backend/app/services/servicio_contenido.py`
 - [x] T002 Review current image search/resource flow in `backend/app/services/servicio_multimedia.py` and `backend/app/routers/multimedia.py`
 - [x] T003 Review current student package and student screen flow in `backend/app/routers/multimedia.py`, `backend/app/routers/publico.py`, `frontend/screens/pantalla_alumno.py`, and `frontend/profeia.kv`
-- [ ] T004 Review current export flow in `backend/app/services/servicio_exportacion.py` and `backend/app/routers/exportacion.py`
+- [x] T004 Review current export flow in `backend/app/services/servicio_exportacion.py` and `backend/app/routers/exportacion.py`
 
 ---
 
@@ -40,9 +40,9 @@
 **Critical**: Complete before story work.
 
 - [x] T005 Confirm `ContenidoPedagogico` and `PaqueteAlumnoRespuesta` contain every required class block in `backend/app/models/clase.py` and `backend/app/models/recurso.py`
-- [ ] T006 Confirm frontend API helpers expose class generation, free image search, student package, and export calls in `frontend/utils/cliente_api.py`
+- [x] T006 Confirm frontend API helpers expose class generation, free image search, student package, and export calls in `frontend/utils/cliente_api.py`
 - [x] T007 Confirm plan quota checks remain backend-owned for class generation, images, and exports in `backend/app/routers/clases.py`, `backend/app/routers/multimedia.py`, and `backend/app/routers/exportacion.py`
-- [ ] T008 Confirm local development fallback remains available for content/resources in `backend/app/core/supabase_client.py`, `backend/app/services/servicio_storage.py`, and `backend/generated/`
+- [x] T008 Confirm local development fallback remains available for content/resources in `backend/app/core/supabase_client.py`, `backend/app/services/servicio_storage.py`, and `backend/generated/`
 
 ---
 
@@ -116,11 +116,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T032 [US4] Confirm PDF line generation includes every core lesson block in `backend/app/services/servicio_exportacion.py`
-- [ ] T033 [US4] Confirm PDF visual generation includes local image resources with metadata when available in `backend/app/services/servicio_exportacion.py`
-- [ ] T034 [US4] Confirm export routers pass relevant resources into PDF/ZIP generation in `backend/app/routers/exportacion.py` and `backend/app/routers/publico.py`
-- [ ] T035 [US4] Improve export screen status messages for included resources and recoverable failures in `frontend/screens/pantalla_exportar.py`
-- [ ] T036 [US4] Run compile validation with `python -m compileall backend/app/services/servicio_exportacion.py backend/app/routers/exportacion.py backend/app/routers/publico.py frontend/screens/pantalla_exportar.py`
+- [x] T032 [US4] Confirm PDF line generation includes every core lesson block in `backend/app/services/servicio_exportacion.py`
+- [x] T033 [US4] Confirm PDF visual generation includes local image resources with metadata when available in `backend/app/services/servicio_exportacion.py`
+- [x] T034 [US4] Confirm export routers pass relevant resources into PDF/ZIP generation in `backend/app/routers/exportacion.py` and `backend/app/routers/publico.py`
+- [x] T035 [US4] Improve export screen status messages for included resources and recoverable failures in `frontend/screens/pantalla_exportar.py`
+- [x] T036 [US4] Run compile validation with `python -m compileall backend/app/services/servicio_exportacion.py backend/app/routers/exportacion.py backend/app/routers/publico.py frontend/screens/pantalla_exportar.py`
 - [ ] T037 [US4] Manually validate Scenario D from `specs/001-mejorar-clase-alumno/quickstart.md`
 
 **Checkpoint**: Exported materials are consistent with student-facing content.
@@ -131,10 +131,10 @@
 
 **Purpose**: Validate the complete feature and update documentation.
 
-- [ ] T038 Run full compile validation with `python -m compileall backend/app frontend`
+- [x] T038 Run full compile validation with `python -m compileall backend/app frontend`
 - [ ] T039 Execute the full quickstart matrix in `specs/001-mejorar-clase-alumno/quickstart.md`
-- [ ] T040 Update progress notes in `docs/08-resumen-avance-y-objetivos.md`
-- [ ] T041 Review `git diff` to confirm changes stay within the planned feature scope
+- [x] T040 Update progress notes in `docs/08-resumen-avance-y-objetivos.md`
+- [x] T041 Review `git diff` to confirm changes stay within the planned feature scope
 
 ---
 
