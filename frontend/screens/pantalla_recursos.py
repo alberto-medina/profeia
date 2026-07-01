@@ -83,7 +83,22 @@ class PantallaRecursos(Screen):
     def _al_buscar_imagenes_web_exito(self, recursos_generados):
         app = MDApp.get_running_app()
         app.estado.recursos_generados["imagenes"] = recursos_generados
-        self.ids.etiqueta_estado.text = f"Imagenes gratis agregadas: {len(recursos_generados)}"
+        origenes = {
+            (recurso.get("metadata_json") or {}).get("origen")
+            for recurso in recursos_generados
+        }
+        if "wikimedia_commons" in origenes:
+            self.ids.etiqueta_estado.text = (
+                f"Imagenes gratis agregadas: {len(recursos_generados)}. "
+                "Se reemplazaron busquedas gratis anteriores."
+            )
+        elif "local" in origenes:
+            self.ids.etiqueta_estado.text = (
+                "No encontre imagenes web confiables; agregue laminas locales "
+                "sin costo para esta clase."
+            )
+        else:
+            self.ids.etiqueta_estado.text = f"Imagenes agregadas: {len(recursos_generados)}"
         self.ids.boton_continuar.disabled = False
         self.ids.indicador_carga.active = False
 
@@ -192,7 +207,10 @@ class PantallaRecursos(Screen):
     def _al_generar_recurso_error(self, error):
         self.ids.boton_continuar.disabled = False
         self.ids.indicador_carga.active = False
-        self.ids.etiqueta_estado.text = cliente_api.mensaje_error(error)
+        self.ids.etiqueta_estado.text = (
+            cliente_api.mensaje_error(error)
+            + " Si el problema es de imagenes gratis, podes continuar sin ellas o adjuntar una imagen propia."
+        )
         print(f"[PantallaRecursos] error al generar recurso: {error}")
 
     def _avanzar_al_siguiente_paso(self):

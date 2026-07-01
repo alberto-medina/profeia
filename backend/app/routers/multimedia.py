@@ -246,14 +246,17 @@ async def buscar_imagenes_web_clase(clase_id: UUID, cantidad: int = 3):
     cliente = obtener_cliente_supabase()
     clase = _obtener_clase_o_404(cliente, clase_id)
     contenido = clase.get("contenido_json") or {}
+    cantidad_segura = max(1, min(cantidad, 5))
+    validar_cupo_docente(cliente, clase["docente_id"], {"imagenes": cantidad_segura})
     _reemplazar_imagenes_gratis(cliente, clase_id)
 
     recursos = await buscar_imagenes_wikimedia(
         cliente=cliente,
         clase_id=clase_id,
         contenido_json=contenido,
-        cantidad=max(1, min(cantidad, 5)),
+        cantidad=cantidad_segura,
     )
+    registrar_consumo_docente(cliente, clase["docente_id"], {"imagenes": len(recursos)})
     return [
         _guardar_recurso(cliente, clase_id, "imagen", recurso["url"], recurso["metadata"])
         for recurso in recursos

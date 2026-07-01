@@ -136,20 +136,62 @@ def _crear_imagen_local_generica(descripcion_visual: str) -> bytes:
 
 TRADUCCIONES_BUSQUEDA = {
     "futbol": "football soccer",
+    "football": "football soccer",
+    "soccer": "football soccer",
     "pases": "passing training",
     "tiros": "shooting training",
+    "deporte": "sports training",
+    "plantas": "plants botany",
+    "planta": "plant botany",
+    "raiz": "plant root",
+    "tallo": "plant stem",
+    "hojas": "plant leaves",
+    "flor": "flower plant",
     "multiplicacion": "multiplication",
     "multiplicar": "multiplication",
     "tablas": "multiplication table",
     "fracciones": "fractions",
-    "plantas": "plants",
     "animales": "animals",
     "cuerpo": "human body",
     "sistema": "system",
     "solar": "solar system",
     "mapa": "map",
+    "provincias": "argentina provinces map",
     "argentina": "argentina",
     "ingles": "english language",
+    "saludos": "greetings english",
+    "presentaciones": "introductions english",
+}
+
+
+MATERIAS_BUSQUEDA = {
+    "matematica": "mathematics education",
+    "matemática": "mathematics education",
+    "lengua": "reading writing education",
+    "ciencias naturales": "science education",
+    "ciencias sociales": "social studies education",
+    "ingles": "english language education",
+    "inglés": "english language education",
+    "educacion artistica": "art education",
+    "educación artística": "art education",
+    "educacion fisica": "physical education",
+    "educación física": "physical education",
+}
+
+
+PALABRAS_PENALIZADAS = {
+    "logo",
+    "icon",
+    "coat of arms",
+    "flag",
+    "portrait",
+    "statue",
+    "building",
+    "mapa mundi",
+    "volcano",
+    "lava",
+    "movie",
+    "album",
 }
 
 
@@ -234,7 +276,8 @@ def _consultas_imagen(contenido_json: dict) -> list[str]:
     )
     texto_normalizado = _sin_acentos(texto).lower()
     palabras = _palabras_importantes(texto_normalizado)
-    materia = _sin_acentos(str(contenido_json.get("titulo", "")).split(":", 1)[0]).lower()
+    materia_visible = str(contenido_json.get("titulo", "")).split(":", 1)[0]
+    materia = _sin_acentos(materia_visible).lower()
 
     consultas = []
     tema = " ".join(palabras[:6])
@@ -247,6 +290,9 @@ def _consultas_imagen(contenido_json: dict) -> list[str]:
         consultas.insert(0, "multiplication table education")
     if "futbol" in texto_normalizado or "pases" in texto_normalizado or "tiros" in texto_normalizado:
         consultas.insert(0, "soccer passing shooting training")
+    materia_consulta = MATERIAS_BUSQUEDA.get(materia)
+    if materia_consulta and tema:
+        consultas.append(f"{tema} {materia_consulta}")
     if materia and palabras:
         consultas.append(f"{palabras[0]} {materia} school")
 
@@ -266,16 +312,32 @@ def _puntuar_resultado_imagen(pagina: dict, consulta: str, palabras_clave: list[
             str(pagina.get("title", "")),
             str((metadata.get("ImageDescription") or {}).get("value", "")),
             str((metadata.get("ObjectName") or {}).get("value", "")),
-            consulta,
         ]
     )
     texto = _sin_acentos(re.sub(r"<[^>]+>", " ", texto)).lower()
     palabras_consulta = _palabras_importantes(consulta)
     claves = set(palabras_clave[:8] + palabras_consulta[:8])
-    puntaje = sum(2 for palabra in claves if palabra in texto)
+    puntaje = 0
+    for palabra in claves:
+        variantes = {palabra}
+        if palabra.endswith("s") and len(palabra) > 4:
+            variantes.add(palabra[:-1])
+        else:
+            variantes.add(f"{palabra}s")
+        if palabra.endswith("ies") and len(palabra) > 5:
+            variantes.add(palabra[:-3] + "y")
+        if any(variante in texto for variante in variantes):
+            puntaje += 2
     if "diagram" in texto or "illustration" in texto or "training" in texto:
         puntaje += 1
+    for palabra in PALABRAS_PENALIZADAS:
+        if palabra in texto and palabra not in consulta:
+            puntaje -= 2
     return puntaje
+
+
+def _umbral_relevancia(palabras_clave: list[str]) -> int:
+    return 3 if len(palabras_clave) >= 3 else 2
 
 
 def extraer_palabras_clave(contenido_json: dict, max_palabras: int = 6) -> str:
@@ -302,6 +364,7 @@ async def buscar_imagenes_wikimedia(
     consultas = _consultas_imagen(contenido_json)
     consulta = consultas[0]
     palabras_clave = _palabras_importantes(_tema_visual(contenido_json))
+    umbral = _umbral_relevancia(palabras_clave)
 
     resultados = []
     try:
@@ -334,7 +397,7 @@ async def buscar_imagenes_wikimedia(
 
                 for pagina in paginas_ordenadas:
                     puntaje = _puntuar_resultado_imagen(pagina, consulta_actual, palabras_clave)
-                    if puntaje < 2 and palabras_clave:
+                    if puntaje < umbral and palabras_clave:
                         continue
 
                     imageinfo = (pagina.get("imageinfo") or [{}])[0]
@@ -370,6 +433,7 @@ async def buscar_imagenes_wikimedia(
                                 "autor": (metadata.get("Artist") or {}).get("value"),
                                 "licencia": (metadata.get("LicenseShortName") or {}).get("value"),
                                 "puntaje_relevancia": puntaje,
+                                "umbral_relevancia": umbral,
                                 "uso": "imagen gratuita encontrada en Wikimedia Commons; revisar atribucion antes de publicar",
                                 "bucket": resultado_storage["bucket"],
                                 "path": resultado_storage["path"],
@@ -408,7 +472,9 @@ async def buscar_imagenes_wikimedia(
             "metadata": {
                 "origen": "local",
                 "consulta": consulta,
-                "uso": "fallback local sin costo",
+                "consultas_intentadas": consultas,
+                "uso": "fallback local sin costo; no se encontraron imagenes gratuitas suficientemente relevantes",
+                "motivo": "sin_resultados_relevantes",
             },
         }
         for url in urls_locales

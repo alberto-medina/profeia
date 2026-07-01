@@ -27,7 +27,7 @@
 **Purpose**: Confirm the current app state before touching implementation.
 
 - [x] T001 Review current generation flow in `backend/app/services/servicio_contenido.py`
-- [ ] T002 Review current image search/resource flow in `backend/app/services/servicio_multimedia.py` and `backend/app/routers/multimedia.py`
+- [x] T002 Review current image search/resource flow in `backend/app/services/servicio_multimedia.py` and `backend/app/routers/multimedia.py`
 - [x] T003 Review current student package and student screen flow in `backend/app/routers/multimedia.py`, `backend/app/routers/publico.py`, `frontend/screens/pantalla_alumno.py`, and `frontend/profeia.kv`
 - [ ] T004 Review current export flow in `backend/app/services/servicio_exportacion.py` and `backend/app/routers/exportacion.py`
 
@@ -41,7 +41,7 @@
 
 - [x] T005 Confirm `ContenidoPedagogico` and `PaqueteAlumnoRespuesta` contain every required class block in `backend/app/models/clase.py` and `backend/app/models/recurso.py`
 - [ ] T006 Confirm frontend API helpers expose class generation, free image search, student package, and export calls in `frontend/utils/cliente_api.py`
-- [ ] T007 Confirm plan quota checks remain backend-owned for class generation, images, and exports in `backend/app/routers/clases.py`, `backend/app/routers/multimedia.py`, and `backend/app/routers/exportacion.py`
+- [x] T007 Confirm plan quota checks remain backend-owned for class generation, images, and exports in `backend/app/routers/clases.py`, `backend/app/routers/multimedia.py`, and `backend/app/routers/exportacion.py`
 - [ ] T008 Confirm local development fallback remains available for content/resources in `backend/app/core/supabase_client.py`, `backend/app/services/servicio_storage.py`, and `backend/generated/`
 
 ---
@@ -95,13 +95,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Strengthen topic keyword extraction for image queries in `backend/app/services/servicio_multimedia.py`
-- [ ] T025 [US2] Improve query variants and translation hints for common school subjects in `backend/app/services/servicio_multimedia.py`
-- [ ] T026 [US2] Tighten relevance scoring and low-confidence rejection in `backend/app/services/servicio_multimedia.py`
-- [ ] T027 [US2] Ensure repeated free-image searches replace only previous free/local image-search resources in `backend/app/routers/multimedia.py`
-- [ ] T028 [US2] Improve teacher-facing free-image status/error messages in `frontend/screens/pantalla_recursos.py`
-- [ ] T029 [US2] Confirm teacher-uploaded images remain attached after free-image replacement in `backend/app/routers/multimedia.py`
-- [ ] T030 [US2] Run compile validation with `python -m compileall backend/app/services/servicio_multimedia.py backend/app/routers/multimedia.py frontend/screens/pantalla_recursos.py`
+- [x] T024 [US2] Strengthen topic keyword extraction for image queries in `backend/app/services/servicio_multimedia.py`
+- [x] T025 [US2] Improve query variants and translation hints for common school subjects in `backend/app/services/servicio_multimedia.py`
+- [x] T026 [US2] Tighten relevance scoring and low-confidence rejection in `backend/app/services/servicio_multimedia.py`
+- [x] T027 [US2] Ensure repeated free-image searches replace only previous free/local image-search resources in `backend/app/routers/multimedia.py`
+- [x] T028 [US2] Improve teacher-facing free-image status/error messages in `frontend/screens/pantalla_recursos.py`
+- [x] T029 [US2] Confirm teacher-uploaded images remain attached after free-image replacement in `backend/app/routers/multimedia.py`
+- [x] T030 [US2] Run compile validation with `python -m compileall backend/app/services/servicio_multimedia.py backend/app/routers/multimedia.py frontend/screens/pantalla_recursos.py`
 - [ ] T031 [US2] Manually validate Scenario B from `specs/001-mejorar-clase-alumno/quickstart.md`
 
 **Checkpoint**: Free image flow is useful even when web results are weak.
