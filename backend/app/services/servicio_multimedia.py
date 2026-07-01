@@ -403,7 +403,7 @@ async def buscar_imagenes_wikimedia(
                     imageinfo = (pagina.get("imageinfo") or [{}])[0]
                     mime = imageinfo.get("mime") or ""
                     url = imageinfo.get("thumburl") or imageinfo.get("url")
-                    if not url or not mime.startswith("image/"):
+                    if not url or not mime.startswith("image/") or mime == "image/svg+xml":
                         continue
 
                     try:

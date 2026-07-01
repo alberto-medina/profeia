@@ -47,9 +47,12 @@ class PantallaAlumno(Screen):
     def _actualizar_barra_codigo(self):
         app = MDApp.get_running_app()
         codigo_listo = bool(app.estado.modo_actual == "alumno" and app.estado.codigo_publico)
-        self.ids.barra_codigo.height = 0 if codigo_listo else dp(48)
-        self.ids.barra_codigo.opacity = 0 if codigo_listo else 1
-        self.ids.barra_codigo.disabled = codigo_listo
+        barra_codigo = self.ids.get("barra_codigo")
+        if not barra_codigo:
+            return
+        barra_codigo.height = 0 if codigo_listo else dp(48)
+        barra_codigo.opacity = 0 if codigo_listo else 1
+        barra_codigo.disabled = codigo_listo
 
     def _texto_o_vacio(self, texto: str | None, vacio: str) -> str:
         texto_limpio = str(texto or "").strip()
