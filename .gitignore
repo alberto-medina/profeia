@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Buildozer / Kivy / Android
+.buildozer/
+bin/
+*.apk
+*.aab
+.kivy/
+
+# Supabase local
+.supabase/
+
+# Exportaciones locales de desarrollo
+backend/generated/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/

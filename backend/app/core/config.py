@@ -1,0 +1,44 @@
+"""
+Configuracion central del backend de ProfeIA.
+Lee variables de entorno desde .env usando pydantic-settings.
+"""
+
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Configuracion(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    # Supabase
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
+    supabase_anon_key: str = ""
+    supabase_storage_bucket: str = "recursos-clases"
+
+    # Proveedores de IA
+    ia_contenido_api_key: str = ""
+    ia_contenido_modelo: str = "gpt-4o-mini"
+    ia_voz_api_key: str = ""
+    ia_voz_proveedor: str = "openai"
+    ia_voz_modelo: str = "gpt-4o-mini-tts"
+    ia_voz_clonada_api_key: str = ""
+    ia_voz_clonada_voice_id: str = ""
+    ia_imagenes_api_key: str = ""
+    ia_imagenes_modelo: str = "gpt-image-1"
+    ia_video_api_key: str = ""
+
+    # Mercado Pago
+    mercado_pago_access_token: str = ""
+    mercado_pago_webhook_secret: str = ""
+    mercado_pago_back_url: str = "http://127.0.0.1:8000/pagos/mercadopago/retorno"
+
+    # General
+    entorno: str = "desarrollo"
+    puerto: int = 8000
+
+
+@lru_cache
+def obtener_configuracion() -> Configuracion:
+    """Devuelve una instancia cacheada de la configuracion."""
+    return Configuracion()

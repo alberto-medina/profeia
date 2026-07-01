@@ -1,0 +1,1567 @@
+#:kivy 2.2.1
+
+<Screen>:
+    canvas.before:
+        Color:
+            rgba: app.color_fondo
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<EtiquetaSeccion@MDLabel>:
+    font_style: "H6"
+    bold: True
+    theme_text_color: "Custom"
+    text_color: app.color_texto
+    size_hint_y: None
+    height: self.texture_size[1] + dp(10)
+    halign: "left"
+    text_size: self.width, None
+
+<CampoTextoLargo@MDTextField>:
+    multiline: True
+    size_hint_y: None
+    height: dp(90)
+    mode: "rectangle"
+
+<MDRectangleFlatButton>:
+    md_bg_color: app.color_azul
+    text_color: 1, 1, 1, 1
+    line_color: app.color_azul
+
+<MDFlatButton>:
+    text_color: app.color_texto_secundario
+
+
+<PantallaEntrada>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(18)
+        spacing: dp(12)
+
+        MDLabel:
+            text: "PI"
+            size_hint: None, None
+            size: dp(48), dp(48)
+            pos_hint: {"center_x": 0.5}
+            halign: "center"
+            valign: "middle"
+            text_size: self.size
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            canvas.before:
+                Color:
+                    rgba: app.color_azul
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(8)]
+
+        MDLabel:
+            text: "ProfeIA"
+            bold: True
+            font_style: "H4"
+            halign: "center"
+            size_hint_y: None
+            height: dp(52)
+            theme_text_color: "Custom"
+            text_color: app.color_texto
+
+        MDLabel:
+            text: "Ingresa el codigo de tu clase"
+            halign: "center"
+            size_hint_y: None
+            height: dp(34)
+            theme_text_color: "Custom"
+            text_color: app.color_texto_secundario
+
+        MDTextField:
+            id: campo_codigo
+            hint_text: "Codigo alumno"
+            mode: "rectangle"
+            halign: "center"
+            font_size: "22sp"
+            size_hint_y: None
+            height: dp(60)
+
+        MDRectangleFlatButton:
+            text: "ENTRAR COMO ALUMNO"
+            size_hint_x: 1
+            height: dp(52)
+            on_release: root.al_presionar_entrar_alumno()
+
+        MDLabel:
+            id: etiqueta_error
+            theme_text_color: "Error"
+            halign: "center"
+            size_hint_y: None
+            height: dp(30)
+
+        EtiquetaSeccion:
+            text: "Docentes"
+            font_style: "Subtitle1"
+
+        MDTextField:
+            id: campo_nombre_docente
+            hint_text: "Nombre docente (solo para crear cuenta)"
+            mode: "rectangle"
+
+        MDTextField:
+            id: campo_email_docente
+            hint_text: "Email docente"
+            mode: "rectangle"
+
+        MDTextField:
+            id: campo_password_docente
+            hint_text: "Clave"
+            mode: "rectangle"
+            password: True
+
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(8)
+            size_hint_y: None
+            height: dp(48)
+
+            MDRectangleFlatButton:
+                id: boton_login_docente
+                text: "INGRESAR"
+                on_release: root.al_presionar_entrar_docente()
+
+            MDFlatButton:
+                id: boton_registro_docente
+                text: "CREAR CUENTA"
+                on_release: root.al_presionar_crear_cuenta_docente()
+
+
+<PantallaInicio>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(18)
+        spacing: dp(12)
+
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(10)
+            size_hint_y: None
+            height: dp(52)
+
+            MDLabel:
+                text: "PI"
+                size_hint: None, None
+                size: dp(36), dp(36)
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+                canvas.before:
+                    Color:
+                        rgba: app.color_azul
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(6)]
+
+            MDLabel:
+                text: "ProfeIA"
+                bold: True
+                font_style: "H6"
+                theme_text_color: "Custom"
+                text_color: app.color_texto
+
+        EtiquetaSeccion:
+            text: "Que queres ensenar hoy?"
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(12)
+                size_hint_y: None
+                height: self.minimum_height
+
+                MDTextField:
+                    id: campo_prompt
+                    hint_text: "Ej: Crea una clase de 8 minutos sobre fracciones para ninos de 10 anos..."
+                    multiline: True
+                    size_hint_y: None
+                    height: dp(120)
+                    mode: "rectangle"
+                    on_text: root.al_cambiar_prompt(self.text)
+
+                EtiquetaSeccion:
+                    text: "Plantillas rapidas"
+                    font_style: "Subtitle1"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(6)
+                    size_hint_y: None
+                    height: dp(48)
+
+                    MDRectangleFlatButton:
+                        text: "EXPLICAR"
+                        on_release: root.al_presionar_plantilla("explicacion")
+
+                    MDFlatButton:
+                        text: "PRACTICAR"
+                        on_release: root.al_presionar_plantilla("practica")
+
+                    MDFlatButton:
+                        text: "EVALUAR"
+                        on_release: root.al_presionar_plantilla("evaluacion")
+
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(10)
+                    spacing: dp(6)
+                    size_hint_y: None
+                    height: dp(126)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        text: "Sugerencias"
+                        bold: True
+                        size_hint_y: None
+                        height: dp(24)
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                    MDLabel:
+                        id: etiqueta_sugerencias
+                        size_hint_y: None
+                        height: dp(54)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto_secundario
+
+                    MDFlatButton:
+                        text: "USAR SUGERENCIAS"
+                        pos_hint: {"center_x": 0.5}
+                        on_release: root.al_presionar_usar_sugerencias()
+
+                EtiquetaSeccion:
+                    text: "Duracion"
+                    font_style: "Subtitle1"
+
+                MDBoxLayout:
+                    id: grupo_duracion
+                    orientation: "horizontal"
+                    size_hint_y: None
+                    height: dp(48)
+                    selected: chip_3min
+
+                    MDChip:
+                        id: chip_3min
+                        text: "3 min"
+                        on_release: grupo_duracion.selected = self
+
+                    MDChip:
+                        id: chip_5min
+                        text: "5 min"
+                        on_release: grupo_duracion.selected = self
+
+                    MDChip:
+                        id: chip_8min
+                        text: "8 min"
+                        on_release: grupo_duracion.selected = self
+
+                    MDChip:
+                        id: chip_15min
+                        text: "15 min"
+                        on_release: grupo_duracion.selected = self
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: dp(48)
+
+                    MDTextField:
+                        id: campo_edad
+                        hint_text: "Edad o grado (obligatorio)"
+                        text: ""
+                        on_text: root.al_cambiar_prompt(self.text)
+
+                    MDTextField:
+                        id: campo_materia
+                        hint_text: "Materia (obligatoria)"
+                        text: ""
+                        on_text: root.al_cambiar_prompt(self.text)
+
+                EtiquetaSeccion:
+                    text: "Apoyos para estudiantes"
+                    font_style: "Subtitle1"
+
+                MDLabel:
+                    text: "Opcional: marca apoyos si la clase necesita mas estructura, pausas o lectura simple."
+                    size_hint_y: None
+                    height: dp(42)
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                GridLayout:
+                    cols: 2
+                    spacing: dp(4)
+                    size_hint_y: None
+                    height: dp(132)
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(36)
+                        MDCheckbox:
+                            id: check_inicio_tdah
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Atencion / TDAH"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(36)
+                        MDCheckbox:
+                            id: check_inicio_tea
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "TEA / autismo"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(36)
+                        MDCheckbox:
+                            id: check_inicio_lectura
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Lectura facil"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(36)
+                        MDCheckbox:
+                            id: check_inicio_ansiedad
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Ansiedad / participacion gradual"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(36)
+                        MDCheckbox:
+                            id: check_inicio_rutina
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Rutina visual"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(36)
+                        MDCheckbox:
+                            id: check_inicio_pausas
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Pausas breves"
+
+                MDLabel:
+                    id: etiqueta_error
+                    theme_text_color: "Error"
+                    size_hint_y: None
+                    height: dp(24)
+
+                MDRectangleFlatButton:
+                    id: boton_generar
+                    text: "GENERAR CLASE"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_generar_clase()
+
+                MDFlatButton:
+                    text: "VER HISTORIAL"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: app.root.current = "historial"
+
+                MDFlatButton:
+                    text: "MI PLAN"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: app.root.current = "plan"
+
+                MDFlatButton:
+                    text: "CERRAR SESION"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_cerrar_sesion()
+
+                MDSpinner:
+                    id: indicador_carga
+                    size_hint: None, None
+                    size: dp(36), dp(36)
+                    pos_hint: {"center_x": 0.5}
+                    active: False
+
+
+<PantallaPlan>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(12)
+
+        EtiquetaSeccion:
+            text: "Mi plan"
+
+        MDLabel:
+            id: etiqueta_docente
+            size_hint_y: None
+            height: dp(30)
+            halign: "center"
+            theme_text_color: "Secondary"
+
+        MDLabel:
+            id: etiqueta_estado
+            size_hint_y: None
+            height: dp(42)
+            halign: "center"
+            text_size: self.width, None
+            theme_text_color: "Custom"
+            text_color: app.color_texto
+
+        MDSpinner:
+            id: indicador_carga
+            size_hint: None, None
+            size: dp(36), dp(36)
+            pos_hint: {"center_x": 0.5}
+            active: False
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(14)
+                size_hint_y: None
+                height: self.minimum_height
+
+                EtiquetaSeccion:
+                    text: "Uso mensual"
+                    font_style: "Subtitle1"
+
+                MDLabel:
+                    id: etiqueta_uso
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+
+                EtiquetaSeccion:
+                    text: "Planes disponibles"
+                    font_style: "Subtitle1"
+
+                MDLabel:
+                    id: etiqueta_planes
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                EtiquetaSeccion:
+                    text: "Suscripcion"
+                    font_style: "Subtitle1"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: dp(48)
+
+                    MDRectangleFlatButton:
+                        id: boton_plan_docente
+                        text: "ACTIVAR DOCENTE"
+                        on_release: root.al_presionar_suscribirse("docente")
+
+                    MDFlatButton:
+                        id: boton_plan_pro
+                        text: "ACTIVAR PRO"
+                        on_release: root.al_presionar_suscribirse("pro")
+
+                MDLabel:
+                    id: etiqueta_estado_pago
+                    size_hint_y: None
+                    height: dp(38)
+                    halign: "center"
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                EtiquetaSeccion:
+                    text: "Cuenta"
+                    font_style: "Subtitle1"
+
+                MDLabel:
+                    text: "Eliminar la cuenta borra el perfil docente y sus clases asociadas."
+                    size_hint_y: None
+                    height: dp(44)
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                MDFlatButton:
+                    text: "CERRAR SESION"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_cerrar_sesion()
+
+                MDFlatButton:
+                    text: "BORRAR CUENTA"
+                    pos_hint: {"center_x": 0.5}
+                    theme_text_color: "Error"
+                    on_release: root.al_presionar_borrar_cuenta()
+
+        MDFlatButton:
+            text: "VOLVER"
+            pos_hint: {"center_x": 0.5}
+            on_release: root.al_presionar_volver()
+
+
+<PantallaHistorial>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(12)
+
+        EtiquetaSeccion:
+            text: "Historial de clases"
+
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(8)
+            size_hint_y: None
+            height: dp(50)
+
+            MDTextField:
+                id: campo_busqueda
+                hint_text: "Buscar por tema, materia o codigo"
+                mode: "rectangle"
+                on_text: root.al_cambiar_busqueda(self.text)
+
+            MDFlatButton:
+                text: "LIMPIAR"
+                on_release: root.al_presionar_limpiar_busqueda()
+
+        MDLabel:
+            id: etiqueta_estado
+            size_hint_y: None
+            height: dp(34)
+            halign: "center"
+            theme_text_color: "Secondary"
+
+        MDSpinner:
+            id: indicador_carga
+            size_hint: None, None
+            size: dp(36), dp(36)
+            pos_hint: {"center_x": 0.5}
+            active: False
+
+        ScrollView:
+            BoxLayout:
+                id: contenedor_clases
+                orientation: "vertical"
+                spacing: dp(8)
+                size_hint_y: None
+                height: self.minimum_height
+
+        MDFlatButton:
+            text: "VOLVER"
+            pos_hint: {"center_x": 0.5}
+            on_release: root.al_presionar_volver()
+
+
+<PantallaContenido>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(10)
+
+        EtiquetaSeccion:
+            text: "Tu clase generada"
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+
+                MDTextField:
+                    id: campo_titulo
+                    hint_text: "Titulo"
+
+                CampoTextoLargo:
+                    id: campo_objetivo
+                    hint_text: "Objetivo"
+
+                CampoTextoLargo:
+                    id: campo_introduccion
+                    hint_text: "Introduccion"
+
+                CampoTextoLargo:
+                    id: campo_explicacion
+                    hint_text: "Explicacion"
+
+                CampoTextoLargo:
+                    id: campo_ejemplos
+                    hint_text: "Ejemplos (uno por linea)"
+
+                CampoTextoLargo:
+                    id: campo_actividad
+                    hint_text: "Actividad"
+
+                CampoTextoLargo:
+                    id: campo_preguntas
+                    hint_text: "Preguntas (una por linea)"
+
+                CampoTextoLargo:
+                    id: campo_cuestionario
+                    hint_text: "Cuestionario (una consigna por linea)"
+
+                CampoTextoLargo:
+                    id: campo_tarea_hogar
+                    hint_text: "Tarea para el hogar"
+
+                CampoTextoLargo:
+                    id: campo_resumen
+                    hint_text: "Resumen / cierre"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(10)
+                    size_hint_y: None
+                    height: dp(48)
+
+                    MDFlatButton:
+                        id: boton_cancelar
+                        text: "CANCELAR"
+                        opacity: 0
+                        disabled: True
+                        on_release: root.al_presionar_cancelar()
+
+                    MDRectangleFlatButton:
+                        id: boton_continuar
+                        text: "CONTINUAR"
+                        on_release: root.al_presionar_continuar()
+
+
+<PantallaAdaptar>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(12)
+
+        EtiquetaSeccion:
+            text: "Adaptar la clase"
+
+        MDLabel:
+            text: "Opcional: genera apoyos para estudiantes que necesitan mas estructura, pausas o consignas simples."
+            size_hint_y: None
+            height: dp(58)
+            text_size: self.width, None
+            theme_text_color: "Secondary"
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: dp(8)
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                MDCheckbox:
+                    id: check_tdah
+                    active: True
+                    size_hint_x: None
+                    width: dp(48)
+                MDLabel:
+                    text: "Atencion / TDAH"
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                MDCheckbox:
+                    id: check_tea
+                    active: False
+                    size_hint_x: None
+                    width: dp(48)
+                MDLabel:
+                    text: "TEA / autismo"
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                MDCheckbox:
+                    id: check_lectura
+                    active: True
+                    size_hint_x: None
+                    width: dp(48)
+                MDLabel:
+                    text: "Lectura facil"
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                MDCheckbox:
+                    id: check_ansiedad
+                    active: False
+                    size_hint_x: None
+                    width: dp(48)
+                MDLabel:
+                    text: "Ansiedad / participacion gradual"
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                MDCheckbox:
+                    id: check_rutina
+                    active: True
+                    size_hint_x: None
+                    width: dp(48)
+                MDLabel:
+                    text: "Rutina visual"
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(40)
+                MDCheckbox:
+                    id: check_pausas
+                    active: True
+                    size_hint_x: None
+                    width: dp(48)
+                MDLabel:
+                    text: "Pausas breves"
+
+        MDLabel:
+            id: etiqueta_estado
+            size_hint_y: None
+            height: dp(34)
+            halign: "center"
+            theme_text_color: "Secondary"
+
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(10)
+            size_hint_y: None
+            height: dp(48)
+
+            MDFlatButton:
+                id: boton_saltar
+                text: "SALTAR"
+                on_release: root.al_presionar_saltar()
+
+            MDRectangleFlatButton:
+                id: boton_generar
+                text: "GENERAR APOYOS"
+                on_release: root.al_presionar_generar_apoyos()
+
+        MDSpinner:
+            id: indicador_carga
+            size_hint: None, None
+            size: dp(36), dp(36)
+            pos_hint: {"center_x": 0.5}
+            active: False
+
+
+<PantallaApoyo>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(10)
+
+        EtiquetaSeccion:
+            text: "Clase adaptada"
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+
+                EtiquetaSeccion:
+                    text: "Resumen docente"
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: etiqueta_resumen
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+
+                EtiquetaSeccion:
+                    text: "Consigna simple"
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: etiqueta_consigna
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+
+                EtiquetaSeccion:
+                    text: "Rutina visual"
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: etiqueta_rutina
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+
+                EtiquetaSeccion:
+                    text: "Pausas"
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: etiqueta_pausas
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+
+                EtiquetaSeccion:
+                    text: "Adaptaciones"
+                    font_style: "Subtitle1"
+                MDLabel:
+                    id: etiqueta_adaptaciones
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(10)
+            size_hint_y: None
+            height: dp(48)
+
+            MDFlatButton:
+                text: "VOLVER"
+                on_release: root.al_presionar_volver()
+
+            MDRectangleFlatButton:
+                text: "CONTINUAR"
+                on_release: root.al_presionar_continuar()
+
+
+<PantallaRecursos>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(12)
+
+        EtiquetaSeccion:
+            text: "Que recursos queres usar?"
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(10)
+                size_hint_y: None
+                height: self.minimum_height
+
+                BoxLayout:
+                    orientation: "vertical"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: self.minimum_height
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_voz
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Voz"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_slides
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Slides"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_imagenes
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Imagenes IA / locales"
+
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(46)
+
+                        MDRectangleFlatButton:
+                            text: "BUSCAR IMAGENES GRATIS"
+                            on_release: root.al_presionar_buscar_imagenes_web()
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_video
+                            active: False
+                            disabled: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Video (proximamente)"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_pdf
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "PDF"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_pptx
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "PowerPoint"
+
+                EtiquetaSeccion:
+                    text: "Recursos propios"
+                    font_style: "Subtitle1"
+
+                MDLabel:
+                    text: "Adjunta imagenes o audios que quieras mostrar en la vista alumno y en el ZIP."
+                    size_hint_y: None
+                    height: dp(52)
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                MDTextField:
+                    id: campo_imagen_docente
+                    hint_text: "Ruta de imagen del docente"
+                    mode: "rectangle"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: dp(46)
+
+                    MDFlatButton:
+                        text: "ELEGIR IMAGEN"
+                        on_release: root.al_presionar_buscar_imagen()
+
+                    MDRectangleFlatButton:
+                        text: "ADJUNTAR"
+                        on_release: root.al_presionar_adjuntar_imagen()
+
+                MDTextField:
+                    id: campo_audio_docente
+                    hint_text: "Ruta de audio del docente"
+                    mode: "rectangle"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: dp(46)
+
+                    MDFlatButton:
+                        text: "ELEGIR AUDIO"
+                        on_release: root.al_presionar_buscar_audio()
+
+                    MDRectangleFlatButton:
+                        text: "ADJUNTAR"
+                        on_release: root.al_presionar_adjuntar_audio()
+
+                MDLabel:
+                    id: etiqueta_estado
+                    size_hint_y: None
+                    height: dp(42)
+                    halign: "center"
+                    text_size: self.width, None
+
+                MDRectangleFlatButton:
+                    id: boton_continuar
+                    text: "CONTINUAR"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_continuar()
+
+                MDSpinner:
+                    id: indicador_carga
+                    size_hint: None, None
+                    size: dp(36), dp(36)
+                    pos_hint: {"center_x": 0.5}
+                    active: False
+
+
+<PantallaVoz>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(12)
+
+        EtiquetaSeccion:
+            text: "Elegir voz"
+
+        MDBoxLayout:
+            id: grupo_voz
+            orientation: "vertical"
+            spacing: dp(8)
+            size_hint_y: None
+            height: dp(180)
+            selected: opcion_femenina
+
+            MDChip:
+                id: opcion_clonada
+                text: "Clonar mi voz"
+                valor_interno: "clonada"
+                on_release: grupo_voz.selected = self
+
+            MDChip:
+                id: opcion_masculina
+                text: "Voz masculina"
+                valor_interno: "masculina"
+                on_release: grupo_voz.selected = self
+
+            MDChip:
+                id: opcion_femenina
+                text: "Voz femenina"
+                valor_interno: "femenina"
+                on_release: grupo_voz.selected = self
+
+            MDChip:
+                id: opcion_infantil
+                text: "Voz infantil"
+                valor_interno: "infantil"
+                on_release: grupo_voz.selected = self
+
+        MDLabel:
+            text: "Idioma: Espanol"
+            size_hint_y: None
+            height: dp(30)
+
+        MDLabel:
+            text: "Velocidad"
+            size_hint_y: None
+            height: dp(24)
+
+        MDSlider:
+            id: slider_velocidad
+            min: 0.5
+            max: 1.5
+            value: 0.9
+            step: 0.05
+
+        MDLabel:
+            id: etiqueta_error
+            theme_text_color: "Error"
+            size_hint_y: None
+            height: dp(24)
+
+        Widget:
+
+        MDRectangleFlatButton:
+            id: boton_generar_voz
+            text: "GENERAR VOZ"
+            pos_hint: {"center_x": 0.5}
+            on_release: root.al_presionar_generar_voz()
+
+        MDSpinner:
+            id: indicador_carga
+            size_hint: None, None
+            size: dp(36), dp(36)
+            pos_hint: {"center_x": 0.5}
+            active: False
+
+
+<PantallaVideo>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(10)
+
+        EtiquetaSeccion:
+            text: "Estructura del video"
+
+        MDLabel:
+            id: etiqueta_intro
+            size_hint_y: None
+            height: dp(40)
+
+        MDLabel:
+            id: etiqueta_desarrollo
+            size_hint_y: None
+            height: dp(60)
+
+        MDLabel:
+            id: etiqueta_ejemplos
+            size_hint_y: None
+            height: dp(40)
+
+        MDLabel:
+            id: etiqueta_actividad
+            size_hint_y: None
+            height: dp(60)
+
+        MDLabel:
+            id: etiqueta_cierre
+            size_hint_y: None
+            height: dp(60)
+
+        Widget:
+
+        MDRectangleFlatButton:
+            text: "CONTINUAR"
+            pos_hint: {"center_x": 0.5}
+            on_release: root.al_presionar_continuar()
+
+
+<PantallaAlumno>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(10)
+
+        EtiquetaSeccion:
+            text: "Clase del alumno"
+
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: dp(8)
+            size_hint_y: None
+            height: dp(48)
+
+            MDTextField:
+                id: campo_codigo
+                hint_text: "Codigo de clase"
+
+            MDRectangleFlatButton:
+                text: "BUSCAR"
+                on_release: root.al_presionar_buscar_codigo()
+
+        MDSpinner:
+            id: indicador_carga
+            size_hint: None, None
+            size: dp(36), dp(36)
+            pos_hint: {"center_x": 0.5}
+            active: False
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(12)
+                size_hint_y: None
+                height: self.minimum_height
+
+                MDLabel:
+                    id: etiqueta_titulo
+                    font_style: "H5"
+                    bold: True
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+                    theme_text_color: "Custom"
+                    text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "De que se trata"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_introduccion.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_introduccion
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Explicacion"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_explicacion.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_explicacion
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Ejemplos"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_ejemplos.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_ejemplos
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Actividad"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_actividad.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_actividad
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Preguntas para pensar"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_preguntas.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_preguntas
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Resumen"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_resumen.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_resumen
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Cuestionario"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_cuestionario.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_cuestionario
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Tarea"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_tarea_hogar.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_tarea_hogar
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Escuchar"
+                    font_style: "Subtitle1"
+                BoxLayout:
+                    id: contenedor_audios
+                    orientation: "vertical"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: self.minimum_height
+
+                EtiquetaSeccion:
+                    text: "Imagenes"
+                    font_style: "Subtitle1"
+                BoxLayout:
+                    id: contenedor_imagenes
+                    orientation: "vertical"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: self.minimum_height
+
+                EtiquetaSeccion:
+                    text: "Apoyos"
+                    font_style: "Subtitle1"
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    size_hint_y: None
+                    height: etiqueta_apoyos.texture_size[1] + dp(28)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        id: etiqueta_apoyos
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(4)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                EtiquetaSeccion:
+                    text: "Descargar"
+                    font_style: "Subtitle1"
+
+                MDCard:
+                    orientation: "vertical"
+                    padding: dp(12)
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: dp(126)
+                    radius: [dp(8)]
+                    elevation: 1
+                    md_bg_color: app.color_superficie
+
+                    MDLabel:
+                        text: "Paquete completo con PDF, PowerPoint y recursos disponibles."
+                        size_hint_y: None
+                        height: dp(34)
+                        text_size: self.width, None
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto_secundario
+
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(44)
+
+                        MDRectangleFlatButton:
+                            id: boton_descargar_paquete
+                            text: "DESCARGAR CLASE"
+                            on_release: root.al_presionar_descargar_paquete()
+
+                        MDFlatButton:
+                            id: boton_abrir_paquete
+                            text: "ABRIR"
+                            opacity: 0
+                            disabled: True
+                            on_release: root.al_presionar_abrir_paquete()
+
+                    MDLabel:
+                        id: etiqueta_estado_descarga
+                        size_hint_y: None
+                        height: dp(24)
+                        halign: "center"
+                        theme_text_color: "Secondary"
+
+        MDFlatButton:
+            text: "VOLVER"
+            pos_hint: {"center_x": 0.5}
+            on_release: root.al_presionar_volver()
+
+
+<PantallaExportar>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(16)
+        spacing: dp(12)
+
+        EtiquetaSeccion:
+            text: "Exportar tu clase"
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(12)
+                size_hint_y: None
+                height: self.minimum_height
+
+                MDFlatButton:
+                    id: boton_editar_clase
+                    text: "EDITAR CLASE"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_editar_clase()
+
+                MDLabel:
+                    id: etiqueta_codigo_publico
+                    size_hint_y: None
+                    height: dp(32)
+                    halign: "center"
+                    theme_text_color: "Secondary"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: dp(46)
+
+                    MDRectangleFlatButton:
+                        id: boton_copiar_codigo
+                        text: "COPIAR CODIGO"
+                        on_release: root.al_presionar_copiar_codigo()
+
+                    MDFlatButton:
+                        id: boton_compartir_whatsapp
+                        text: "WHATSAPP"
+                        on_release: root.al_presionar_compartir_whatsapp()
+
+                MDLabel:
+                    id: etiqueta_estado_compartir
+                    size_hint_y: None
+                    height: dp(28)
+                    halign: "center"
+                    theme_text_color: "Secondary"
+
+                MDRectangleFlatButton:
+                    text: "VISTA ALUMNO"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: app.root.current = "alumno"
+
+                MDRectangleFlatButton:
+                    id: boton_exportar_pdf
+                    text: "EXPORTAR PDF"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_exportar_pdf()
+
+                MDLabel:
+                    id: etiqueta_estado_pdf
+                    size_hint_y: None
+                    height: dp(32)
+                    halign: "center"
+                    valign: "middle"
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                MDRectangleFlatButton:
+                    id: boton_abrir_carpeta_pdf
+                    text: "ABRIR EXPORTACIONES"
+                    size_hint_y: None
+                    height: dp(44)
+                    pos_hint: {"center_x": 0.5}
+                    opacity: 0
+                    disabled: True
+                    on_release: root.al_presionar_abrir_carpeta_pdf()
+
+                MDRectangleFlatButton:
+                    id: boton_exportar_pptx
+                    text: "EXPORTAR POWERPOINT"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_exportar_pptx()
+
+                MDLabel:
+                    id: etiqueta_estado_pptx
+                    size_hint_y: None
+                    height: dp(38)
+                    halign: "center"
+                    valign: "middle"
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                MDRectangleFlatButton:
+                    id: boton_exportar_zip
+                    text: "EXPORTAR PAQUETE ZIP"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_exportar_zip()
+
+                MDLabel:
+                    id: etiqueta_estado_zip
+                    size_hint_y: None
+                    height: dp(38)
+                    halign: "center"
+                    valign: "middle"
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                MDLabel:
+                    text: "Publicacion directa a TikTok / YouTube / Instagram / WhatsApp disponible en la proxima version."
+                    size_hint_y: None
+                    height: dp(72)
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                MDFlatButton:
+                    text: "CREAR OTRA CLASE"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_nueva_clase()
+
+                MDFlatButton:
+                    text: "VER HISTORIAL"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: app.root.current = "historial"
