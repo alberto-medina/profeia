@@ -26,7 +26,7 @@
 
 **Purpose**: Confirm the current app state before touching implementation.
 
-- [ ] T001 Review current generation flow in `backend/app/services/servicio_contenido.py`
+- [x] T001 Review current generation flow in `backend/app/services/servicio_contenido.py`
 - [ ] T002 Review current image search/resource flow in `backend/app/services/servicio_multimedia.py` and `backend/app/routers/multimedia.py`
 - [ ] T003 Review current student package and student screen flow in `backend/app/routers/multimedia.py`, `backend/app/routers/publico.py`, `frontend/screens/pantalla_alumno.py`, and `frontend/profeia.kv`
 - [ ] T004 Review current export flow in `backend/app/services/servicio_exportacion.py` and `backend/app/routers/exportacion.py`
@@ -39,7 +39,7 @@
 
 **Critical**: Complete before story work.
 
-- [ ] T005 Confirm `ContenidoPedagogico` and `PaqueteAlumnoRespuesta` contain every required class block in `backend/app/models/clase.py` and `backend/app/models/recurso.py`
+- [x] T005 Confirm `ContenidoPedagogico` and `PaqueteAlumnoRespuesta` contain every required class block in `backend/app/models/clase.py` and `backend/app/models/recurso.py`
 - [ ] T006 Confirm frontend API helpers expose class generation, free image search, student package, and export calls in `frontend/utils/cliente_api.py`
 - [ ] T007 Confirm plan quota checks remain backend-owned for class generation, images, and exports in `backend/app/routers/clases.py`, `backend/app/routers/multimedia.py`, and `backend/app/routers/exportacion.py`
 - [ ] T008 Confirm local development fallback remains available for content/resources in `backend/app/core/supabase_client.py`, `backend/app/services/servicio_storage.py`, and `backend/generated/`
@@ -54,14 +54,14 @@
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Strengthen prompt boilerplate cleanup and destinatario removal in `backend/app/services/servicio_contenido.py`
-- [ ] T010 [US1] Strengthen materia correction by selected subject plus keywords in `backend/app/services/servicio_contenido.py`
-- [ ] T011 [US1] Expand local subject profiles for common Argentine school subjects and ambiguous prompts in `backend/app/services/servicio_contenido.py`
-- [ ] T012 [US1] Ensure local generation fills objective, introduction, explanation, examples, activity, questions, questionnaire, homework, and summary in `backend/app/services/servicio_contenido.py`
-- [ ] T013 [US1] Ensure OpenAI failure and quota errors fall back to local generation where safe in `backend/app/services/servicio_contenido.py`
-- [ ] T014 [US1] Improve teacher-facing validation messages for missing materia/edad in `frontend/screens/pantalla_inicio.py`
-- [ ] T015 [US1] Run compile validation for generation changes with `python -m compileall backend/app/services/servicio_contenido.py frontend/screens/pantalla_inicio.py`
-- [ ] T016 [US1] Manually validate Scenario A from `specs/001-mejorar-clase-alumno/quickstart.md`
+- [x] T009 [US1] Strengthen prompt boilerplate cleanup and destinatario removal in `backend/app/services/servicio_contenido.py`
+- [x] T010 [US1] Strengthen materia correction by selected subject plus keywords in `backend/app/services/servicio_contenido.py`
+- [x] T011 [US1] Expand local subject profiles for common Argentine school subjects and ambiguous prompts in `backend/app/services/servicio_contenido.py`
+- [x] T012 [US1] Ensure local generation fills objective, introduction, explanation, examples, activity, questions, questionnaire, homework, and summary in `backend/app/services/servicio_contenido.py`
+- [x] T013 [US1] Ensure OpenAI failure and quota errors fall back to local generation where safe in `backend/app/services/servicio_contenido.py`
+- [x] T014 [US1] Improve teacher-facing validation messages for missing materia/edad in `frontend/screens/pantalla_inicio.py`
+- [x] T015 [US1] Run compile validation for generation changes with `python -m compileall backend/app/services/servicio_contenido.py frontend/screens/pantalla_inicio.py`
+- [x] T016 [US1] Manually validate Scenario A from `specs/001-mejorar-clase-alumno/quickstart.md`
 
 **Checkpoint**: User Story 1 works independently and is the first MVP stop.
 

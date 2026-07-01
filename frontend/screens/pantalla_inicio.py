@@ -197,10 +197,10 @@ class PantallaInicio(Screen):
         edad_publico = self.ids.campo_edad.text.strip()
         materia = self.ids.campo_materia.text.strip()
         if not edad_publico:
-            self.ids.etiqueta_error.text = "Completa la edad o grado antes de generar."
+            self.ids.etiqueta_error.text = "Completa la edad o grado para adaptar la clase."
             return
         if not materia:
-            self.ids.etiqueta_error.text = "Completa la materia antes de generar."
+            self.ids.etiqueta_error.text = "Completa la materia para enfocar mejor el tema."
             return
 
         self.ids.etiqueta_error.text = ""

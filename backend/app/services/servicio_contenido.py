@@ -74,6 +74,40 @@ PERFILES_MATERIA = {
     },
 }
 
+ALIAS_MATERIAS = {
+    "matematica": "matematica",
+    "matematicas": "matematica",
+    "matemática": "matematica",
+    "matemáticas": "matematica",
+    "lengua": "lengua",
+    "practicas del lenguaje": "lengua",
+    "prácticas del lenguaje": "lengua",
+    "ciencias naturales": "ciencias naturales",
+    "naturales": "ciencias naturales",
+    "biologia": "ciencias naturales",
+    "biología": "ciencias naturales",
+    "ciencias sociales": "ciencias sociales",
+    "sociales": "ciencias sociales",
+    "historia": "ciencias sociales",
+    "geografia": "ciencias sociales",
+    "geografía": "ciencias sociales",
+    "ingles": "ingles",
+    "inglés": "ingles",
+    "english": "ingles",
+    "educacion artistica": "educacion artistica",
+    "educación artística": "educacion artistica",
+    "artistica": "educacion artistica",
+    "artística": "educacion artistica",
+    "arte": "educacion artistica",
+    "musica": "educacion artistica",
+    "música": "educacion artistica",
+    "educacion fisica": "educacion fisica",
+    "educación física": "educacion fisica",
+    "fisica": "educacion fisica",
+    "física": "educacion fisica",
+    "deportes": "educacion fisica",
+}
+
 
 def construir_prompt_sistema() -> str:
     """Prompt de sistema usado para guiar a la IA generadora de contenido."""
@@ -168,7 +202,29 @@ def _restaurar_espanol(texto: str) -> str:
         "comprension": "comprensión",
         "produccion": "producción",
         "relacion": "relación",
+        "relacionen": "relacionen",
         "fenomenos": "fenómenos",
+        "observacion": "observación",
+        "Observacion": "Observación",
+        "demostracion": "demostración",
+        "Demostracion": "Demostración",
+        "coordinacion": "coordinación",
+        "tecnica": "técnica",
+        "tecnico": "técnico",
+        "caracteristicas": "características",
+        "historico": "histórico",
+        "geografico": "geográfico",
+        "ubicacion": "ubicación",
+        "linea": "línea",
+        "decision": "decisión",
+        "aplicacion": "aplicación",
+        "fraccion": "fracción",
+        "cuantos": "cuántos",
+        "precision": "precisión",
+        "oposicion": "oposición",
+        "oracion": "oración",
+        "conversacion": "conversación",
+        "pronunciacion": "pronunciación",
         "conclusion": "conclusión",
         "evaluacion": "evaluación",
         "practica": "práctica",
@@ -225,10 +281,14 @@ def _sin_acentos_basico(texto: str) -> str:
 
 def _corregir_texto_docente(texto: str) -> str:
     correcciones = {
+        "uan": "una",
         "cclase": "clase",
         "clas ": "clase ",
         "matematica": "matematica",
         "multiplicar": "multiplicar",
+        "inlges": "ingles",
+        "ingels": "ingles",
+        "caulquiera": "cualquiera",
     }
     texto_corregido = texto
     for original, reemplazo in correcciones.items():
@@ -251,7 +311,11 @@ def _extraer_duracion_desde_prompt(prompt_original: str, duracion_actual: int) -
 def _es_pedido_generico(texto: str) -> bool:
     texto_limpio = _normalizar_espacios(texto).lower()
     texto_limpio = re.sub(r"\b(3|5|8|15)\s*(min|minutos)\b", "", texto_limpio)
-    texto_limpio = re.sub(r"\b(crea|crear|clase|una|un|de|sobre|para|en)\b", "", texto_limpio)
+    texto_limpio = re.sub(
+        r"\b(crea|crear|genera|generar|arma|armar|clase|actividad|una|un|de|sobre|para|en|con)\b",
+        "",
+        texto_limpio,
+    )
     return len(_normalizar_espacios(texto_limpio)) < 5
 
 
@@ -283,6 +347,11 @@ def _extraer_tema_desde_prompt(prompt_original: str, materia: str) -> str:
         return materia or "la clase"
 
     patrones_inicio = [
+        r"^necesito\s+",
+        r"^quiero\s+",
+        r"^hacer\s+",
+        r"^armar\s+",
+        r"^genera(?:r)?\s+",
         r"^crea una clase con evaluacion corta sobre\s+",
         r"^crea una clase clara y breve sobre\s+",
         r"^crea una clase de practica guiada sobre\s+",
@@ -293,6 +362,9 @@ def _extraer_tema_desde_prompt(prompt_original: str, materia: str) -> str:
         r"^crear una clase de\s+",
         r"^crea una clase sobre\s+",
         r"^crear una clase sobre\s+",
+        r"^una clase de\s+",
+        r"^una clase sobre\s+",
+        r"^clase de\s+",
         r"^sobre\s+",
         r"^clase sobre\s+",
     ]
@@ -319,6 +391,8 @@ def _extraer_tema_desde_prompt(prompt_original: str, materia: str) -> str:
 
     texto = _normalizar_espacios(texto)
     texto = re.sub(r"\b(3|5|8|15)\s*(min|minutos)\b", "", texto, flags=re.IGNORECASE)
+    texto = re.sub(r"\b(con\s+)?evaluacion\s+corta\b", "", texto, flags=re.IGNORECASE)
+    texto = re.sub(r"\b(practica\s+guiada|explicacion\s+rapida|clara\s+y\s+breve)\b", "", texto, flags=re.IGNORECASE)
     texto = _limpiar_destinatario_en_tema(texto)
     texto = _normalizar_espacios(texto)
     if _es_pedido_generico(texto):
@@ -351,7 +425,16 @@ def _es_tema_fracciones(prompt_original: str, tema: str) -> bool:
     return "fraccion" in texto or "fracciones" in texto
 
 
+def _normalizar_clave_materia(materia: str) -> str | None:
+    materia_limpia = _normalizar_espacios(_sin_acentos_basico(materia))
+    return ALIAS_MATERIAS.get(materia_limpia)
+
+
 def _clave_materia(materia: str, prompt_original: str) -> str:
+    materia_normalizada = _normalizar_clave_materia(materia)
+    if materia_normalizada:
+        return materia_normalizada
+
     texto = f"{materia} {prompt_original}".lower()
     if (
         "futbol" in texto
@@ -375,7 +458,7 @@ def _clave_materia(materia: str, prompt_original: str) -> str:
         return "educacion artistica"
     if "matemat" in texto or "numero" in texto or "calculo" in texto or "tabla" in texto or "fraccion" in texto:
         return "matematica"
-    return materia.strip().lower() if materia.strip().lower() in PERFILES_MATERIA else "matematica"
+    return "matematica"
 
 
 def _perfil_materia(materia: str, prompt_original: str) -> dict:
@@ -670,8 +753,83 @@ def _generar_contenido_fracciones(
     )
 
 
+def _ejemplos_por_materia(clave_materia: str, tema: str, perfil: dict) -> list[str]:
+    tema_limpio = tema[:1].lower() + tema[1:]
+    if clave_materia == "educacion fisica":
+        return [
+            f"Demostracion: practicar {tema_limpio} primero sin oposicion, cuidando postura, mirada y control del movimiento.",
+            "Ejercicio 1: en parejas, realizar 10 intentos suaves y contar cuantos salen con precision.",
+            "Ejercicio 2: armar estaciones de practica con conos o marcas y rotar cada 3 minutos.",
+            "Juego aplicado: usar la habilidad en un partido reducido y detener una jugada para explicar una decision.",
+        ]
+    if clave_materia == "ciencias naturales":
+        return [
+            f"Observacion guiada: mirar un objeto, imagen o experiencia relacionada con {tema_limpio} y nombrar tres caracteristicas.",
+            "Ejemplo cotidiano: conectar el tema con algo que los estudiantes puedan ver en casa, la escuela o el barrio.",
+            "Registro: completar un cuadro con 'veo', 'pienso' y 'me pregunto'.",
+            "Explicacion cientifica simple: usar dos palabras clave del tema en una conclusion breve.",
+        ]
+    if clave_materia == "ciencias sociales":
+        return [
+            f"Ubicacion: marcar en un mapa, linea de tiempo o cuadro donde aparece {tema_limpio}.",
+            "Comparacion: analizar que cambia y que permanece entre dos momentos, lugares o grupos.",
+            "Fuente breve: observar una imagen o texto y responder quien participa, que ocurre y por que importa.",
+            "Relacion: unir una causa con una consecuencia usando una frase propia.",
+        ]
+    if clave_materia == "lengua":
+        return [
+            f"Lectura breve: leer un texto corto vinculado con {tema_limpio} y subrayar dos ideas importantes.",
+            "Vocabulario: elegir tres palabras clave, explicar su significado y usarlas en una oracion.",
+            "Produccion: escribir un parrafo de 5 lineas con inicio, desarrollo y cierre.",
+            "Revision: intercambiar producciones y mejorar una frase para que sea mas clara.",
+        ]
+    if clave_materia == "ingles":
+        return [
+            f"Vocabulary: presentar 5 palabras o frases sobre {tema_limpio} con imagen o gesto.",
+            "Model sentence: practicar una estructura simple, por ejemplo 'I can...', 'This is...' o 'My name is...'.",
+            "Pair practice: repetir en parejas una mini conversacion de dos turnos.",
+            "Exit ticket: cada estudiante dice o escribe una frase corta usando el vocabulario.",
+        ]
+    if clave_materia == "educacion artistica":
+        return [
+            f"Observacion: mirar una obra, sonido o produccion relacionada con {tema_limpio} y describir colores, formas, ritmo o textura.",
+            "Exploracion: probar dos materiales o recursos expresivos y comparar el efecto que producen.",
+            "Produccion: crear una pieza breve siguiendo una consigna clara.",
+            "Apreciacion: explicar una decision propia usando vocabulario de la materia.",
+        ]
+    return [
+        f"Ejemplo 1: usar {perfil['situacion']} para presentar {tema_limpio} con lenguaje simple.",
+        f"Ejemplo 2: resolver un caso guiado aplicando esta estrategia: {perfil['estrategia']}.",
+        "Ejemplo 3: mostrar una produccion o respuesta incompleta y mejorarla entre todos.",
+        "Ejemplo 4: pedir a un estudiante que explique con sus palabras y a otro que agregue una pregunta.",
+    ]
+
+
+def _actividad_por_materia(clave_materia: str, perfil: dict) -> str:
+    if clave_materia == "educacion fisica":
+        return (
+            "Actividad principal: entrada en calor breve, demostracion tecnica, "
+            "practica por estaciones y juego reducido. El docente observa una "
+            "habilidad concreta, da feedback corto y cierra con una pregunta sobre "
+            "la regla, la decision o la estrategia usada."
+        )
+    if clave_materia == "ingles":
+        return (
+            "Actividad principal: presentar vocabulario con apoyo visual, repetir "
+            "pronunciacion, practicar una frase modelo en parejas y cerrar con una "
+            "mini produccion oral o escrita individual."
+        )
+    return (
+        f"Actividad principal: {perfil['actividad']}. Primero se hace un ejemplo "
+        "entre todos, luego trabajan en parejas o pequenos grupos y finalmente "
+        f"cada grupo entrega {perfil['producto']}. Cerrar revisando una produccion "
+        "correcta y una que necesite mejora."
+    )
+
+
 def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagogico:
     """Generador local para demo cuando no hay API key configurada."""
+    clave_materia = _clave_materia(solicitud.materia, solicitud.prompt_original)
     materia = _nombre_materia_visible(solicitud.materia.strip(), solicitud.prompt_original)
     tema = _extraer_tema_desde_prompt(solicitud.prompt_original, materia)
     publico = solicitud.edad_publico.strip() or "estudiantes"
@@ -679,6 +837,8 @@ def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagog
     tema_minuscula = tema[:1].lower() + tema[1:]
     tema_frase = _tema_en_frase(tema_minuscula)
     perfil = _perfil_materia(materia, solicitud.prompt_original)
+    ejemplos = _ejemplos_por_materia(clave_materia, tema, perfil)
+    actividad = _actividad_por_materia(clave_materia, perfil)
 
     if _es_tema_tablas(solicitud.prompt_original, tema):
         return _normalizar_contenido_espanol(
@@ -709,18 +869,8 @@ def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagog
             "nombrar la idea principal, mostrar un ejemplo guiado y pedir una aplicacion "
             "breve. Si aparecen dudas, volver al ejemplo y separar la consigna en partes."
         ),
-        ejemplos=[
-            f"Ejemplo 1: usar {perfil['situacion']} para presentar {tema_minuscula} con lenguaje simple.",
-            f"Ejemplo 2: resolver un caso guiado aplicando esta estrategia: {perfil['estrategia']}.",
-            "Ejemplo 3: mostrar una produccion o respuesta incompleta y mejorarla entre todos.",
-            "Ejemplo 4: pedir a un estudiante que explique con sus palabras y a otro que agregue una pregunta.",
-        ],
-        actividad=(
-            f"Actividad principal: {perfil['actividad']}. Primero se hace un ejemplo "
-            "entre todos, luego trabajan en parejas o pequenos grupos y finalmente "
-            f"cada grupo entrega {perfil['producto']}. Cerrar revisando una produccion "
-            "correcta y una que necesite mejora."
-        ),
+        ejemplos=ejemplos,
+        actividad=actividad,
         preguntas=[
             f"Que significa {tema_minuscula} con tus propias palabras?",
             "Que observamos o usamos en el ejemplo guiado?",
@@ -824,7 +974,7 @@ async def generar_contenido_pedagogico(
             )
         except httpx.HTTPStatusError as error:
             codigo = error.response.status_code
-            if codigo in {429, 500, 502, 503, 504}:
+            if codigo in {400, 401, 403, 404, 408, 409, 422, 429, 500, 502, 503, 504}:
                 print(
                     "[servicio_contenido] OpenAI no disponible "
                     f"(HTTP {codigo}); usando generador local."
