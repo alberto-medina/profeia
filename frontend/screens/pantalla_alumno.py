@@ -37,11 +37,27 @@ class PantallaAlumno(Screen):
         app = MDApp.get_running_app()
         if app.estado.codigo_publico:
             self.ids.campo_codigo.text = app.estado.codigo_publico
+        self._actualizar_barra_codigo()
 
         if app.estado.modo_actual == "alumno" and app.estado.codigo_publico:
             self._cargar_por_codigo(app.estado.codigo_publico)
         else:
             self._cargar_por_clase_actual()
+
+    def _actualizar_barra_codigo(self):
+        app = MDApp.get_running_app()
+        codigo_listo = bool(app.estado.modo_actual == "alumno" and app.estado.codigo_publico)
+        self.ids.barra_codigo.height = 0 if codigo_listo else dp(48)
+        self.ids.barra_codigo.opacity = 0 if codigo_listo else 1
+        self.ids.barra_codigo.disabled = codigo_listo
+
+    def _texto_o_vacio(self, texto: str | None, vacio: str) -> str:
+        texto_limpio = str(texto or "").strip()
+        return texto_limpio if texto_limpio else vacio
+
+    def _lista_o_vacio(self, items: list, vacio: str) -> str:
+        valores = [str(item).strip() for item in (items or []) if str(item).strip()]
+        return "\n".join(f"- {item}" for item in valores) if valores else vacio
 
     def _limpiar_estado_carga(self):
         self.ids.etiqueta_titulo.text = "Cargando clase..."
@@ -58,6 +74,9 @@ class PantallaAlumno(Screen):
         self.ids.contenedor_audios.clear_widgets()
         self.ids.contenedor_imagenes.clear_widgets()
         self.ids.indicador_carga.active = True
+        self._ruta_zip_alumno = None
+        self.ids.boton_abrir_paquete.disabled = True
+        self.ids.boton_abrir_paquete.opacity = 0
 
     def _cargar_por_clase_actual(self):
         self._limpiar_estado_carga()
@@ -77,7 +96,7 @@ class PantallaAlumno(Screen):
     def al_presionar_buscar_codigo(self):
         codigo = self.ids.campo_codigo.text.strip().upper()
         if not codigo:
-            self.ids.etiqueta_titulo.text = "Ingresa un codigo de clase."
+            self.ids.etiqueta_titulo.text = "Ingresa el codigo que te dio tu docente."
             return
         self._cargar_por_codigo(codigo)
 
@@ -98,30 +117,39 @@ class PantallaAlumno(Screen):
         self.ids.indicador_carga.active = False
 
         self.ids.etiqueta_titulo.text = paquete.get("titulo", "Clase")
-        self.ids.etiqueta_introduccion.text = paquete.get("introduccion", "")
-        self.ids.etiqueta_explicacion.text = paquete.get("explicacion", "")
+        self.ids.etiqueta_introduccion.text = self._texto_o_vacio(
+            paquete.get("introduccion"),
+            "Esta clase todavia no tiene una introduccion cargada.",
+        )
+        self.ids.etiqueta_explicacion.text = self._texto_o_vacio(
+            paquete.get("explicacion"),
+            "Esta clase todavia no tiene una explicacion cargada.",
+        )
         ejemplos = paquete.get("ejemplos", []) or []
-        self.ids.etiqueta_ejemplos.text = (
-            "\n".join(f"- {ejemplo}" for ejemplo in ejemplos)
-            if ejemplos
-            else "Sin ejemplos cargados."
+        self.ids.etiqueta_ejemplos.text = self._lista_o_vacio(
+            ejemplos,
+            "Esta clase todavia no tiene ejemplos cargados.",
         )
-        self.ids.etiqueta_actividad.text = paquete.get("actividad", "")
+        self.ids.etiqueta_actividad.text = self._texto_o_vacio(
+            paquete.get("actividad"),
+            "Esta clase todavia no tiene una actividad cargada.",
+        )
         preguntas = paquete.get("preguntas", []) or []
-        self.ids.etiqueta_preguntas.text = (
-            "\n".join(f"- {pregunta}" for pregunta in preguntas)
-            if preguntas
-            else "Sin preguntas cargadas."
+        self.ids.etiqueta_preguntas.text = self._lista_o_vacio(
+            preguntas,
+            "Esta clase todavia no tiene preguntas cargadas.",
         )
-        self.ids.etiqueta_resumen.text = paquete.get("resumen", "")
+        self.ids.etiqueta_resumen.text = self._texto_o_vacio(
+            paquete.get("resumen"),
+            "Esta clase todavia no tiene resumen cargado.",
+        )
         cuestionario = paquete.get("cuestionario", []) or []
-        self.ids.etiqueta_cuestionario.text = (
-            "\n".join(f"- {consigna}" for consigna in cuestionario)
-            if cuestionario
-            else "Sin cuestionario cargado."
+        self.ids.etiqueta_cuestionario.text = self._lista_o_vacio(
+            cuestionario,
+            "Esta clase todavia no tiene cuestionario cargado.",
         )
         self.ids.etiqueta_tarea_hogar.text = (
-            paquete.get("tarea_hogar") or "Sin tarea para el hogar cargada."
+            self._texto_o_vacio(paquete.get("tarea_hogar"), "Sin tarea para el hogar cargada.")
         )
 
         audio_resumen = paquete.get("audio_resumen")
@@ -131,13 +159,13 @@ class PantallaAlumno(Screen):
         for audio in audios_docente:
             self._agregar_fila_audio(audio, "Audio docente")
         if not audio_resumen and not audios_docente:
-            self._agregar_mensaje(self.ids.contenedor_audios, "Sin audios asociados todavia.")
+            self._agregar_mensaje(self.ids.contenedor_audios, "No hay audios para esta clase todavia.")
 
         imagenes = paquete.get("imagenes", [])
         for imagen in imagenes:
             self._agregar_fila_imagen(imagen)
         if not imagenes:
-            self._agregar_mensaje(self.ids.contenedor_imagenes, "Sin imagenes asociadas todavia.")
+            self._agregar_mensaje(self.ids.contenedor_imagenes, "No hay imagenes para esta clase todavia.")
 
         apoyos = paquete.get("apoyos") or {}
         rutina = apoyos.get("rutina_visual", [])
@@ -147,16 +175,21 @@ class PantallaAlumno(Screen):
             texto_apoyos.append(consigna)
         if rutina:
             texto_apoyos.append("\n".join(rutina))
-        self.ids.etiqueta_apoyos.text = "\n\n".join(texto_apoyos) or "Sin apoyos especiales generados."
+        self.ids.etiqueta_apoyos.text = "\n\n".join(texto_apoyos) or "Sin apoyos especiales para esta clase."
 
     def _al_cargar_error(self, error):
         self.ids.indicador_carga.active = False
-        self.ids.etiqueta_titulo.text = "No se pudo cargar la vista alumno."
+        self.ids.etiqueta_titulo.text = cliente_api.mensaje_error(error)
         print(f"[PantallaAlumno] error al cargar paquete alumno: {error}")
 
     def _nombre_recurso(self, recurso: dict, prefijo: str = "Recurso") -> str:
         metadata = recurso.get("metadata_json") or {}
-        return metadata.get("nombre") or Path(str(recurso.get("url_storage") or "")).name or prefijo
+        return (
+            metadata.get("nombre")
+            or metadata.get("titulo")
+            or Path(str(recurso.get("url_storage") or "")).name
+            or prefijo
+        )
 
     def _ruta_local(self, recurso: dict) -> Path | None:
         url_storage = str(recurso.get("url_storage") or "")
@@ -322,7 +355,7 @@ class PantallaAlumno(Screen):
         threading.Thread(target=tarea, daemon=True).start()
 
     def _mostrar_error_recurso(self, error):
-        self.ids.etiqueta_titulo.text = "No se pudo abrir el recurso."
+        self.ids.etiqueta_estado_descarga.text = "No se pudo abrir el recurso."
         print(f"[PantallaAlumno] error recurso remoto: {error}")
 
     def _abrir_recurso(self, ruta: Path | None, url: str | None, *args):
@@ -378,6 +411,8 @@ class PantallaAlumno(Screen):
         if app.estado.modo_actual == "alumno":
             app.estado.codigo_publico = None
             app.estado.paquete_alumno_actual = None
+            self.ids.campo_codigo.text = ""
+            self._actualizar_barra_codigo()
             app.root.current = "entrada"
         else:
             app.root.current = "exportar"

@@ -28,7 +28,7 @@
 
 - [x] T001 Review current generation flow in `backend/app/services/servicio_contenido.py`
 - [ ] T002 Review current image search/resource flow in `backend/app/services/servicio_multimedia.py` and `backend/app/routers/multimedia.py`
-- [ ] T003 Review current student package and student screen flow in `backend/app/routers/multimedia.py`, `backend/app/routers/publico.py`, `frontend/screens/pantalla_alumno.py`, and `frontend/profeia.kv`
+- [x] T003 Review current student package and student screen flow in `backend/app/routers/multimedia.py`, `backend/app/routers/publico.py`, `frontend/screens/pantalla_alumno.py`, and `frontend/profeia.kv`
 - [ ] T004 Review current export flow in `backend/app/services/servicio_exportacion.py` and `backend/app/routers/exportacion.py`
 
 ---
@@ -75,13 +75,13 @@
 
 ### Implementation for User Story 3
 
-- [ ] T017 [US3] Ensure `construir_paquete_alumno` maps every required lesson block in `backend/app/routers/multimedia.py`
-- [ ] T018 [US3] Ensure public code lookup returns only student-safe package data in `backend/app/routers/publico.py`
-- [ ] T019 [US3] Refine student screen state loading and empty states in `frontend/screens/pantalla_alumno.py`
-- [ ] T020 [US3] Refine student section layout for introduction, explanation, examples, activity, questions, questionnaire, homework, summary, resources, and supports in `frontend/profeia.kv`
-- [ ] T021 [US3] Confirm student mode cannot navigate into teacher editing, plan, payment, or generation flows in `frontend/screens/pantalla_alumno.py` and `frontend/main.py`
-- [ ] T022 [US3] Run compile validation with `python -m compileall backend/app/routers/multimedia.py backend/app/routers/publico.py frontend/screens/pantalla_alumno.py frontend/main.py`
-- [ ] T023 [US3] Manually validate Scenario C from `specs/001-mejorar-clase-alumno/quickstart.md`
+- [x] T017 [US3] Ensure `construir_paquete_alumno` maps every required lesson block in `backend/app/routers/multimedia.py`
+- [x] T018 [US3] Ensure public code lookup returns only student-safe package data in `backend/app/routers/publico.py`
+- [x] T019 [US3] Refine student screen state loading and empty states in `frontend/screens/pantalla_alumno.py`
+- [x] T020 [US3] Refine student section layout for introduction, explanation, examples, activity, questions, questionnaire, homework, summary, resources, and supports in `frontend/profeia.kv`
+- [x] T021 [US3] Confirm student mode cannot navigate into teacher editing, plan, payment, or generation flows in `frontend/screens/pantalla_alumno.py` and `frontend/main.py`
+- [x] T022 [US3] Run compile validation with `python -m compileall backend/app/routers/multimedia.py backend/app/routers/publico.py frontend/screens/pantalla_alumno.py frontend/main.py`
+- [x] T023 [US3] Manually validate Scenario C from `specs/001-mejorar-clase-alumno/quickstart.md`
 
 **Checkpoint**: Student view is complete and independently usable.
 
