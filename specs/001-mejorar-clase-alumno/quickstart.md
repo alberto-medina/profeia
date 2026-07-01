@@ -95,3 +95,27 @@ python -m compileall backend/app frontend
 Expected:
 
 - No compile errors in edited Python files.
+
+## Local Smoke Validation
+
+To validate the backend flow without Supabase real, paid AI, or the Kivy UI:
+
+```powershell
+cd C:\profeia
+python scripts\validar_flujo_local.py
+```
+
+Expected:
+
+- A local class is generated.
+- A student code is generated.
+- Local image resources are attached.
+- Student package data includes the core class blocks and images.
+- PDF and ZIP files are created in `backend/generated/exportaciones`.
+
+To also try Wikimedia before local fallback:
+
+```powershell
+cd C:\profeia
+python scripts\validar_flujo_local.py --web
+```

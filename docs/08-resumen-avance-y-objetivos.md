@@ -303,6 +303,9 @@ Flujo alumno:
   mismos bloques centrales de la clase, incorporan recursos locales cuando
   estan disponibles y el manifiesto del ZIP indica el archivo interno de cada
   recurso.
+- Se agrego un validador local de flujo completo en
+  `scripts/validar_flujo_local.py` para probar sin Supabase real ni IA paga:
+  genera clase, recursos, vista alumno, PDF y ZIP desde backend.
 
 ## Matriz de IA recomendada
 
