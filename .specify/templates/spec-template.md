@@ -77,6 +77,10 @@
 
 - What happens when [boundary condition]?
 - How does system handle [error scenario]?
+- What happens if OpenAI, Wikimedia, Mercado Pago, Supabase, or another external provider is unavailable?
+- What does the student see if a resource is missing, remote-only, or still generating?
+- How does the feature behave when the teacher is on the Gratis plan or reaches a quota?
+- What changes for TDAH/TEA/lectura facil supports, and how can the teacher edit them?
 
 ## Requirements *(mandatory)*
 
@@ -92,6 +96,11 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-STUDENT**: Student-facing behavior MUST be stated separately from teacher-facing behavior.
+- **FR-FALLBACK**: Features touching AI, web search, payments, or storage MUST define a local/free fallback.
+- **FR-EXPORT**: Features changing class content MUST state impact on PDF, PowerPoint, ZIP, and student package.
+- **FR-COST**: Paid or quota-bound operations MUST be controlled by backend configuration and plan limits.
+- **FR-ACCESS**: Accessibility support MUST use pedagogical, respectful, teacher-editable language.
 
 *Example of marking unclear requirements:*
 
@@ -102,6 +111,10 @@
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
+- **Clase**: Generated lesson content, code, teacher ownership, and editable pedagogical structure.
+- **RecursoGenerado**: PDF, PPTX, ZIP, image, audio, voice, slide, or teacher-provided asset.
+- **PaqueteAlumno**: Student-safe view of a class accessed by public code.
+- **Docente/Plan/UsoMensual**: Teacher account, subscription level, and quota consumption.
 
 ## Success Criteria *(mandatory)*
 
@@ -116,6 +129,9 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-PROFEIA-001**: A teacher can complete the affected flow locally without paid AI credits.
+- **SC-PROFEIA-002**: A student can understand the class from the code view without seeing teacher tools.
+- **SC-PROFEIA-003**: Exported/shareable outputs remain accurate after the feature is used.
 
 ## Assumptions
 

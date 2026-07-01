@@ -21,10 +21,11 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+- **Backend**: `backend/app/models/`, `backend/app/routers/`, `backend/app/services/`, `backend/app/core/`
+- **Frontend**: `frontend/screens/`, `frontend/utils/`, `frontend/widgets/`, `frontend/profeia.kv`
+- **Database/storage**: `supabase/migrations/`
+- **Docs/product**: `docs/`
+- **Dev scripts**: `scripts/`
 
 <!--
   ============================================================================
@@ -63,12 +64,12 @@ description: "Task list template for feature implementation"
 
 Examples of foundational tasks (adjust based on your project):
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T004 Confirm local development fallback for the feature in `backend/app/core/` or relevant service
+- [ ] T005 [P] Define/update backend schemas in `backend/app/models/`
+- [ ] T006 [P] Define/update API routes in `backend/app/routers/`
+- [ ] T007 Define/update Supabase migration if persistence changes in `supabase/migrations/`
+- [ ] T008 Confirm backend quota/configuration behavior for paid or external-provider usage
+- [ ] T009 Confirm student/teacher separation for affected screens and endpoints
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -157,6 +158,11 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
+- [ ] TXXX Verify no paid AI/provider failure blocks the core local flow
+- [ ] TXXX Verify PDF/PPTX/ZIP/student package still reflect class content accurately
+- [ ] TXXX Verify accessibility language is pedagogical, respectful, and editable
+- [ ] TXXX Run `python -m compileall` for edited backend/frontend Python modules
+- [ ] TXXX Update `docs/08-resumen-avance-y-objetivos.md` when product behavior changes
 
 ---
 

@@ -18,29 +18,35 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Language/Version**: Python 3.11 backend/frontend runtime, PowerShell dev scripts
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Primary Dependencies**: FastAPI, Kivy/KivyMD, Supabase/Postgres, Mercado Pago, optional AI providers
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Storage**: Supabase/Postgres and Supabase Storage in production; local JSON/files in development fallback
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Testing**: `python -m compileall` for edited Python modules; add focused tests when risk justifies it
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Target Platform**: Windows development, FastAPI backend, Kivy desktop/mobile-oriented frontend
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Project Type**: FastAPI service plus Kivy app
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Performance Goals**: teacher can complete the primary class flow without blocking on paid AI availability
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
+**Constraints**: preserve local dev fallback, guard paid provider usage, keep student flow separate from teacher tools
 
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: MVP for individual teachers first, extensible to paid plans and institutional use
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **Aula real**: Does the feature improve a real teacher/student workflow, not just add novelty?
+- **Student/teacher separation**: Are student-facing screens free of teacher controls and payment/admin flows?
+- **No-paid-AI fallback**: If AI/web/provider access fails, is there a usable local or free fallback?
+- **Accessibility responsibility**: Are TDAH/TEA/reading supports pedagogical, respectful, and editable?
+- **Cost/backend control**: Are paid or quota-bound operations validated by backend limits/configuration?
+- **Export/share impact**: If class content changes, are PDF/PPTX/ZIP/student package impacts considered?
+- **Data/storage parity**: Are Supabase production behavior and local development fallback both addressed?
 
 ## Project Structure
 
@@ -65,39 +71,21 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
+backend/app/
 ├── models/
+├── routers/
 ├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+└── core/
 
 frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
+├── screens/
+├── utils/
+├── widgets/
+└── profeia.kv
 
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+supabase/migrations/
+docs/
+scripts/
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real
