@@ -19,6 +19,17 @@ class Configuracion(BaseSettings):
     # Proveedores de IA
     ia_contenido_api_key: str = ""
     ia_contenido_modelo: str = "gpt-4o-mini"
+    ia_contenido_openai_url: str = "https://api.openai.com/v1/responses"
+    ia_contenido_deepseek_api_key: str = ""
+    ia_contenido_deepseek_modelo: str = "deepseek-chat"
+    ia_contenido_deepseek_url: str = "https://api.deepseek.com/chat/completions"
+    ia_contenido_openrouter_api_key: str = ""
+    ia_contenido_openrouter_modelo: str = "deepseek/deepseek-chat"
+    ia_contenido_openrouter_url: str = "https://openrouter.ai/api/v1/chat/completions"
+    ia_contenido_groq_api_key: str = ""
+    ia_contenido_groq_modelo: str = "llama-3.1-8b-instant"
+    ia_contenido_groq_url: str = "https://api.groq.com/openai/v1/chat/completions"
+    ia_contenido_fallback_local: bool = False
     ia_voz_api_key: str = ""
     ia_voz_proveedor: str = "openai"
     ia_voz_modelo: str = "gpt-4o-mini-tts"
@@ -26,6 +37,10 @@ class Configuracion(BaseSettings):
     ia_voz_clonada_voice_id: str = ""
     ia_imagenes_api_key: str = ""
     ia_imagenes_modelo: str = "gpt-image-1"
+    ia_imagenes_url: str = "https://api.openai.com/v1/images/generations"
+    ia_imagenes_secundario_api_key: str = ""
+    ia_imagenes_secundario_modelo: str = ""
+    ia_imagenes_secundario_url: str = ""
     ia_video_api_key: str = ""
 
     # Mercado Pago

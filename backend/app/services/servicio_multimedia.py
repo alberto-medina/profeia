@@ -645,6 +645,7 @@ async def _generar_imagen_openai(
     api_key: str,
     modelo: str,
     prompt: str,
+    url: str = OPENAI_IMAGES_URL,
 ) -> bytes:
     payload = {
         "model": modelo,
@@ -659,7 +660,7 @@ async def _generar_imagen_openai(
 
     async with httpx.AsyncClient(timeout=90) as cliente_http:
         respuesta = await cliente_http.post(
-            OPENAI_IMAGES_URL,
+            url or OPENAI_IMAGES_URL,
             headers=headers,
             json=payload,
         )
@@ -680,6 +681,31 @@ async def _generar_imagen_openai(
     raise RuntimeError("La API de imagenes no devolvio contenido usable.")
 
 
+def _proveedores_imagenes(configuracion) -> list[dict]:
+    proveedores = []
+    if _valor_configurado(configuracion.ia_imagenes_api_key):
+        proveedores.append(
+            {
+                "nombre": "OpenAI Images",
+                "api_key": configuracion.ia_imagenes_api_key,
+                "modelo": configuracion.ia_imagenes_modelo,
+                "url": configuracion.ia_imagenes_url,
+            }
+        )
+    if _valor_configurado(configuracion.ia_imagenes_secundario_api_key) and _valor_configurado(
+        configuracion.ia_imagenes_secundario_url
+    ):
+        proveedores.append(
+            {
+                "nombre": "Imagenes secundario",
+                "api_key": configuracion.ia_imagenes_secundario_api_key,
+                "modelo": configuracion.ia_imagenes_secundario_modelo,
+                "url": configuracion.ia_imagenes_secundario_url,
+            }
+        )
+    return proveedores
+
+
 async def generar_imagenes(
     cliente,
     clase_id: UUID,
@@ -691,7 +717,8 @@ async def generar_imagenes(
     Si no hay API key configurada, conserva el modo simulado para desarrollo.
     """
     configuracion = obtener_configuracion()
-    if not _valor_configurado(configuracion.ia_imagenes_api_key):
+    proveedores = _proveedores_imagenes(configuracion)
+    if not proveedores:
         return await _generar_imagenes_locales(
             cliente,
             clase_id,
@@ -700,47 +727,48 @@ async def generar_imagenes(
         )
 
     prompt = _construir_prompt_imagen(descripcion_visual, parametros.estilo)
-    urls = []
-    try:
-        for indice in range(parametros.cantidad):
-            contenido = await _generar_imagen_openai(
-                configuracion.ia_imagenes_api_key,
-                configuracion.ia_imagenes_modelo,
-                prompt,
+    for proveedor in proveedores:
+        urls = []
+        try:
+            for indice in range(parametros.cantidad):
+                contenido = await _generar_imagen_openai(
+                    proveedor["api_key"],
+                    proveedor["modelo"],
+                    prompt,
+                    proveedor["url"],
+                )
+                resultado_storage = await guardar_recurso_docente(
+                    cliente=cliente,
+                    clase_id=clase_id,
+                    nombre_archivo=f"imagen-ia-{indice + 1}.png",
+                    contenido=contenido,
+                    content_type="image/png",
+                )
+                urls.append(resultado_storage["url"])
+            return urls
+        except httpx.HTTPStatusError as error:
+            detalle = error.response.text[:300]
+            print(
+                f"[servicio_multimedia] {proveedor['nombre']} no disponible "
+                f"(HTTP {error.response.status_code}); probando siguiente proveedor. "
+                f"Detalle: {detalle}"
             )
-            resultado_storage = await guardar_recurso_docente(
-                cliente=cliente,
-                clase_id=clase_id,
-                nombre_archivo=f"imagen-ia-{indice + 1}.png",
-                contenido=contenido,
-                content_type="image/png",
+        except (httpx.RequestError, ValueError, RuntimeError) as error:
+            print(
+                f"[servicio_multimedia] Error con {proveedor['nombre']}; "
+                f"probando siguiente proveedor. Detalle: {error}"
             )
-            urls.append(resultado_storage["url"])
-    except httpx.HTTPStatusError as error:
-        detalle = error.response.text[:300]
-        print(
-            "[servicio_multimedia] OpenAI Images no disponible "
-            f"(HTTP {error.response.status_code}); usando imagenes simuladas. "
-            f"Detalle: {detalle}"
-        )
-        return await _generar_imagenes_locales(
-            cliente,
-            clase_id,
-            descripcion_visual,
-            parametros.cantidad,
-        )
-    except (httpx.RequestError, ValueError, RuntimeError) as error:
-        print(
-            "[servicio_multimedia] Error al generar imagenes reales; "
-            f"usando imagenes simuladas. Detalle: {error}"
-        )
-        return await _generar_imagenes_locales(
-            cliente,
-            clase_id,
-            descripcion_visual,
-            parametros.cantidad,
-        )
-    return urls
+
+    print(
+        "[servicio_multimedia] Ningun proveedor de imagenes respondio; "
+        "usando imagenes locales."
+    )
+    return await _generar_imagenes_locales(
+        cliente,
+        clase_id,
+        descripcion_visual,
+        parametros.cantidad,
+    )
 
 
 async def generar_estructura_slides(clase_id: UUID, contenido_json: dict) -> dict:

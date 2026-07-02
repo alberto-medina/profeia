@@ -62,8 +62,9 @@ Flujo alumno:
 - Endpoint para crear clases desde prompt.
 - Generador local de contenido pedagogico mas completo.
 - El contenido pedagogico incluye cuestionario editable y tarea para el hogar.
-- Integracion opcional con OpenAI para generar contenido real si se configura
-  `IA_CONTENIDO_API_KEY`.
+- Integracion IA-first para generar contenido real: OpenAI primero y luego
+  proveedores compatibles configurables como DeepSeek, OpenRouter o Groq si se
+  cargan sus API keys.
 - Integracion opcional con OpenAI Images para generar imagenes reales si se
   configura `IA_IMAGENES_API_KEY`; sin key mantiene imagenes simuladas para
   desarrollo.
@@ -310,13 +311,25 @@ Flujo alumno:
   la app intenta enriquecer temas random con Wikipedia, elige mejor entre varios
   resultados, descarta fuentes tangenciales y usa ideas de la fuente para
   mejorar explicacion, ejemplos, preguntas, cuestionario y tarea.
+- Se cambio el criterio de producto: si hay API key de IA configurada, la app
+  prioriza IA real y por defecto no reemplaza una falla de OpenAI con una clase
+  local floja. El fallback local queda como modo demo controlado mediante
+  `IA_CONTENIDO_FALLBACK_LOCAL=true`.
+- Se agrego cadena de proveedores para texto pedagogico: si OpenAI falla por
+  cuota, billing o error temporal, el backend prueba DeepSeek, OpenRouter y
+  Groq cuando estan configurados antes de decidir si muestra error o cae al
+  modo local de demo.
+- Se agrego proveedor secundario configurable para imagenes compatibles con
+  endpoint tipo `images/generations`, para que OpenAI Images no sea el unico
+  camino cuando haya una alternativa activa.
 
 ## Matriz de IA recomendada
 
-- Texto pedagogico: OpenAI Responses API con `gpt-4o-mini` para MVP por costo,
-  velocidad y salida JSON estructurada.
-- Imagenes: OpenAI Images con `gpt-image-1` para MVP, con fallback local si
-  la API devuelve limite, modelo no disponible o error temporal.
+- Texto pedagogico: cadena de proveedores IA. OpenAI Responses API queda como
+  primera opcion; DeepSeek, OpenRouter o Groq pueden actuar como respaldo si
+  hay keys disponibles. La salida debe validarse como JSON estructurado.
+- Imagenes: OpenAI Images con `gpt-image-1` para MVP, con proveedor secundario
+  configurable compatible y fallback local si ninguna API responde.
 - Voz narrada comun: OpenAI TTS con `gpt-4o-mini-tts`, suficiente para resumen
   de clase y audio alumno.
 - Voz clonada: ElevenLabs con voice_id y consentimiento explicito del docente.
@@ -388,6 +401,9 @@ Cada plan puede limitar:
 - Cuando haya internet, ProfeIA debe apoyarse en fuentes abiertas antes de caer
   en plantillas genericas; el modo local sin IA debe ser una red de seguridad,
   no la experiencia principal vendible.
+- Para una experiencia comercial, la generacion pedagogica debe ser IA-first:
+  si la IA no tiene credito o falla, es mejor mostrar un error claro que entregar
+  una clase mediocre.
 - Las adaptaciones para TDAH/TEA deben ser respetuosas, pedagogicas y no
   clinicas.
 - La voz clonada debe requerir consentimiento claro.

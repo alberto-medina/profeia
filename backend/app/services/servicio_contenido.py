@@ -10,6 +10,7 @@ import json
 import re
 
 import httpx
+from fastapi import HTTPException, status
 
 from app.core.config import obtener_configuracion
 from app.models.clase import ContenidoPedagogico, SolicitudCrearClase
@@ -173,6 +174,19 @@ def _schema_contenido_pedagogico() -> dict:
     }
 
 
+def _instruccion_json_pedagogico() -> str:
+    return (
+        "Devolve solamente JSON valido, sin markdown ni texto extra. "
+        "Usa exactamente estas claves: titulo, objetivo, introduccion, "
+        "explicacion, ejemplos, actividad, preguntas, cuestionario, "
+        "tarea_hogar, resumen. "
+        "La clase debe ser concreta, lista para aula argentina, con ejemplos "
+        "claros, una explicacion didactica, actividad aplicable, preguntas, "
+        "cuestionario breve y tarea. No repitas literalmente el pedido del "
+        "docente como contenido."
+    )
+
+
 def _construir_prompt_usuario(solicitud: SolicitudCrearClase) -> str:
     return (
         "Genera una clase completa con estos datos:\n"
@@ -184,6 +198,18 @@ def _construir_prompt_usuario(solicitud: SolicitudCrearClase) -> str:
         "en aula, con ejemplos cotidianos, preguntas de repaso, cuestionario "
         "breve y tarea para el hogar."
     )
+
+
+def _limpiar_json_modelo(texto: str) -> str:
+    texto_limpio = (texto or "").strip()
+    if texto_limpio.startswith("```"):
+        texto_limpio = re.sub(r"^```(?:json)?", "", texto_limpio, flags=re.IGNORECASE).strip()
+        texto_limpio = re.sub(r"```$", "", texto_limpio).strip()
+    inicio = texto_limpio.find("{")
+    fin = texto_limpio.rfind("}")
+    if inicio >= 0 and fin > inicio:
+        return texto_limpio[inicio : fin + 1]
+    return texto_limpio
 
 
 def _normalizar_espacios(texto: str) -> str:
@@ -382,6 +408,9 @@ def _extraer_tema_desde_prompt(prompt_original: str, materia: str) -> str:
         r"^clase de\s+",
         r"^sobre\s+",
         r"^clase sobre\s+",
+        r"^tema random sobre\s+",
+        r"^tema al azar sobre\s+",
+        r"^tema cualquiera sobre\s+",
     ]
 
     anterior = None
@@ -408,6 +437,8 @@ def _extraer_tema_desde_prompt(prompt_original: str, materia: str) -> str:
     texto = re.sub(r"\b(3|5|8|15)\s*(min|minutos)\b", "", texto, flags=re.IGNORECASE)
     texto = re.sub(r"\b(con\s+)?evaluacion\s+corta\b", "", texto, flags=re.IGNORECASE)
     texto = re.sub(r"\b(practica\s+guiada|explicacion\s+rapida|clara\s+y\s+breve)\b", "", texto, flags=re.IGNORECASE)
+    texto = re.sub(r"\bpara\s+(explicar|trabajar|ensenar|enseñar)(\s+con\s+ejemplos)?\b.*$", "", texto, flags=re.IGNORECASE)
+    texto = re.sub(r"\b(para|con|sobre|de)\s*$", "", texto, flags=re.IGNORECASE)
     texto = _limpiar_destinatario_en_tema(texto)
     texto = _normalizar_espacios(texto)
     if _es_pedido_generico(texto):
@@ -911,7 +942,7 @@ def _ejemplos_por_materia(clave_materia: str, tema: str, perfil: dict) -> list[s
     ]
 
 
-def _detalles_tema(clave_materia: str, tema: str) -> dict:
+def _detalles_tema(clave_materia: str, tema: str, perfil: dict) -> dict:
     tema_limpio = tema[:1].lower() + tema[1:]
     texto = _sin_acentos_basico(tema)
 
@@ -1015,6 +1046,30 @@ def _detalles_tema(clave_materia: str, tema: str) -> dict:
                 "con aceite. Registrar observacion, tipo de mezcla y justificacion."
             ),
             "producto": "una tabla de observacion con clasificacion y justificacion",
+        }
+
+    if "volcan" in texto:
+        return {
+            "definicion": (
+                "Un volcan es una abertura de la corteza terrestre por donde pueden "
+                "salir magma, gases y cenizas desde el interior de la Tierra. Cuando "
+                "el magma llega a la superficie se llama lava."
+            ),
+            "pasos": [
+                "ubicar las partes principales del volcan",
+                "diferenciar magma, lava, gases y cenizas",
+                "explicar que ocurre durante una erupcion",
+                "relacionar el fenomeno con cambios en el relieve",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: dibujar un volcan en corte y senalar camara magmatica, "
+                "chimenea, crater y lava. Luego explicar el recorrido del magma hasta salir."
+            ),
+            "practica": (
+                "Actividad guiada: completar un esquema de volcan con nombres y escribir "
+                "en tres pasos que pasa antes, durante y despues de una erupcion."
+            ),
+            "producto": "un esquema rotulado de volcan con una explicacion breve de la erupcion",
         }
 
     if "colonial" in texto or "epoca colonial" in texto:
@@ -1177,7 +1232,7 @@ def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagog
     tema_minuscula = tema[:1].lower() + tema[1:]
     tema_frase = _tema_en_frase(tema_minuscula)
     perfil = _perfil_materia(materia, solicitud.prompt_original)
-    detalle = _detalles_tema(clave_materia, tema)
+    detalle = _detalles_tema(clave_materia, tema, perfil)
     ejemplos = [
         detalle["ejemplo_modelado"],
         *[f"Paso {indice + 1}: {paso}." for indice, paso in enumerate(detalle["pasos"])],
@@ -1260,6 +1315,7 @@ async def _generar_con_openai(
     solicitud: SolicitudCrearClase,
     api_key: str,
     modelo: str,
+    url: str = OPENAI_RESPONSES_URL,
 ) -> ContenidoPedagogico:
     payload = {
         "model": modelo,
@@ -1285,15 +1341,129 @@ async def _generar_con_openai(
 
     async with httpx.AsyncClient(timeout=45) as cliente:
         respuesta = await cliente.post(
-            OPENAI_RESPONSES_URL,
+            url or OPENAI_RESPONSES_URL,
             headers=headers,
             json=payload,
         )
         respuesta.raise_for_status()
 
     texto = _extraer_texto_respuesta_openai(respuesta.json())
-    datos = json.loads(texto)
+    datos = json.loads(_limpiar_json_modelo(texto))
     return ContenidoPedagogico.model_validate(datos)
+
+
+def _extraer_texto_respuesta_chat(respuesta_json: dict) -> str:
+    opciones = respuesta_json.get("choices") or []
+    if not opciones:
+        return ""
+    mensaje = opciones[0].get("message") or {}
+    contenido = mensaje.get("content") or ""
+    if isinstance(contenido, list):
+        partes = []
+        for item in contenido:
+            if isinstance(item, dict):
+                partes.append(str(item.get("text") or item.get("content") or ""))
+            else:
+                partes.append(str(item))
+        return "".join(partes)
+    return str(contenido)
+
+
+async def _generar_con_chat_compatible(
+    solicitud: SolicitudCrearClase,
+    api_key: str,
+    modelo: str,
+    url: str,
+) -> ContenidoPedagogico:
+    payload = {
+        "model": modelo,
+        "messages": [
+            {
+                "role": "system",
+                "content": f"{construir_prompt_sistema()} {_instruccion_json_pedagogico()}",
+            },
+            {"role": "user", "content": _construir_prompt_usuario(solicitud)},
+        ],
+        "temperature": 0.35,
+        "max_tokens": 2200,
+        "response_format": {"type": "json_object"},
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    async with httpx.AsyncClient(timeout=60) as cliente:
+        respuesta = await cliente.post(url, headers=headers, json=payload)
+        respuesta.raise_for_status()
+
+    texto = _extraer_texto_respuesta_chat(respuesta.json())
+    datos = json.loads(_limpiar_json_modelo(texto))
+    return ContenidoPedagogico.model_validate(datos)
+
+
+def _proveedores_contenido(configuracion) -> list[dict]:
+    proveedores = []
+    if _valor_configurado(configuracion.ia_contenido_api_key):
+        proveedores.append(
+            {
+                "nombre": "OpenAI",
+                "tipo": "responses",
+                "api_key": configuracion.ia_contenido_api_key,
+                "modelo": configuracion.ia_contenido_modelo,
+                "url": configuracion.ia_contenido_openai_url,
+            }
+        )
+    if _valor_configurado(configuracion.ia_contenido_deepseek_api_key):
+        proveedores.append(
+            {
+                "nombre": "DeepSeek",
+                "tipo": "chat",
+                "api_key": configuracion.ia_contenido_deepseek_api_key,
+                "modelo": configuracion.ia_contenido_deepseek_modelo,
+                "url": configuracion.ia_contenido_deepseek_url,
+            }
+        )
+    if _valor_configurado(configuracion.ia_contenido_openrouter_api_key):
+        proveedores.append(
+            {
+                "nombre": "OpenRouter",
+                "tipo": "chat",
+                "api_key": configuracion.ia_contenido_openrouter_api_key,
+                "modelo": configuracion.ia_contenido_openrouter_modelo,
+                "url": configuracion.ia_contenido_openrouter_url,
+            }
+        )
+    if _valor_configurado(configuracion.ia_contenido_groq_api_key):
+        proveedores.append(
+            {
+                "nombre": "Groq",
+                "tipo": "chat",
+                "api_key": configuracion.ia_contenido_groq_api_key,
+                "modelo": configuracion.ia_contenido_groq_modelo,
+                "url": configuracion.ia_contenido_groq_url,
+            }
+        )
+    return proveedores
+
+
+async def _generar_con_proveedor(
+    solicitud: SolicitudCrearClase,
+    proveedor: dict,
+) -> ContenidoPedagogico:
+    if proveedor["tipo"] == "responses":
+        return await _generar_con_openai(
+            solicitud,
+            proveedor["api_key"],
+            proveedor["modelo"],
+            proveedor["url"],
+        )
+    return await _generar_con_chat_compatible(
+        solicitud,
+        proveedor["api_key"],
+        proveedor["modelo"],
+        proveedor["url"],
+    )
 
 
 async def generar_contenido_pedagogico(
@@ -1304,6 +1474,15 @@ async def generar_contenido_pedagogico(
     """
     configuracion = obtener_configuracion()
 
+    def _error_ia_no_disponible(mensaje: str) -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail=(
+                f"{mensaje}. La generacion local queda solo para modo demo; "
+                "para crear clases vendibles hace falta credito/API de IA activa."
+            ),
+        )
+
     async def generar_local_con_web() -> ContenidoPedagogico:
         contenido_local = _generar_contenido_local(solicitud)
         tema = _extraer_tema_desde_prompt(solicitud.prompt_original, solicitud.materia)
@@ -1311,27 +1490,41 @@ async def generar_contenido_pedagogico(
         contexto = await _buscar_contexto_wikipedia(consulta)
         return _aplicar_contexto_web(contenido_local, contexto)
 
-    if _valor_configurado(configuracion.ia_contenido_api_key):
+    proveedores = _proveedores_contenido(configuracion)
+    errores = []
+    for proveedor in proveedores:
         try:
-            return await _generar_con_openai(
-                solicitud,
-                configuracion.ia_contenido_api_key,
-                configuracion.ia_contenido_modelo,
-            )
+            contenido = await _generar_con_proveedor(solicitud, proveedor)
+            return _normalizar_contenido_espanol(contenido)
         except httpx.HTTPStatusError as error:
             codigo = error.response.status_code
-            if codigo in {400, 401, 403, 404, 408, 409, 422, 429, 500, 502, 503, 504}:
-                print(
-                    "[servicio_contenido] OpenAI no disponible "
-                    f"(HTTP {codigo}); usando generador local."
-                )
-                return await generar_local_con_web()
-            raise
-        except (httpx.RequestError, json.JSONDecodeError, ValueError) as error:
+            detalle = error.response.text[:220].replace("\n", " ")
+            errores.append(f"{proveedor['nombre']} HTTP {codigo}: {detalle}")
             print(
-                "[servicio_contenido] Error al generar con OpenAI; "
-                f"usando generador local. Detalle: {error}"
+                f"[servicio_contenido] {proveedor['nombre']} no disponible "
+                f"(HTTP {codigo}); probando siguiente proveedor."
             )
-            return await generar_local_con_web()
+            continue
+        except (httpx.RequestError, json.JSONDecodeError, ValueError) as error:
+            errores.append(f"{proveedor['nombre']}: {error}")
+            print(
+                f"[servicio_contenido] Error con {proveedor['nombre']}; "
+                "probando siguiente proveedor. "
+                f"Detalle: {error}"
+            )
+            continue
+
+    if proveedores and not configuracion.ia_contenido_fallback_local:
+        detalle = " | ".join(errores[-3:]) if errores else "sin detalle"
+        raise _error_ia_no_disponible(
+            "Ningun proveedor de IA pudo generar la clase "
+            f"({detalle})"
+        )
+
+    if proveedores:
+        print(
+            "[servicio_contenido] Ningun proveedor de IA respondio; "
+            "usando generador local porque IA_CONTENIDO_FALLBACK_LOCAL=true."
+        )
 
     return await generar_local_con_web()

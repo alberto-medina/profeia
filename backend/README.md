@@ -35,22 +35,50 @@ externos. Los datos se pierden al reiniciar el servidor.
 
 ## Generacion de contenido con IA
 
-El generador de clases funciona en dos modos:
+El generador de clases es IA-first. Si hay proveedores configurados, prueba en
+cadena hasta conseguir una respuesta pedagogica en JSON:
 
-- Sin `IA_CONTENIDO_API_KEY`: usa un generador local de desarrollo, suficiente
-  para probar el flujo completo con contenido pedagogico editable.
-- Con `IA_CONTENIDO_API_KEY`: llama a OpenAI Responses API y pide una respuesta
-  JSON estructurada con titulo, objetivo, introduccion, explicacion, ejemplos,
-  actividad, preguntas y resumen.
+1. OpenAI Responses API.
+2. DeepSeek compatible con chat completions.
+3. OpenRouter compatible con chat completions.
+4. Groq compatible con chat completions.
 
-Para activar IA real, copiar `.env.example` a `.env` y completar:
+Si todos fallan y `IA_CONTENIDO_FALLBACK_LOCAL=false`, el backend devuelve un
+error claro para no entregar una clase local floja como si fuera contenido
+vendible. El generador local queda para desarrollo o demo.
+
+Para activar IA real, copiar `.env.example` a `.env` y completar uno o varios:
 
 ```env
 IA_CONTENIDO_API_KEY=sk-...
 IA_CONTENIDO_MODELO=gpt-4o-mini
+
+IA_CONTENIDO_DEEPSEEK_API_KEY=...
+IA_CONTENIDO_DEEPSEEK_MODELO=deepseek-chat
+
+IA_CONTENIDO_OPENROUTER_API_KEY=...
+IA_CONTENIDO_OPENROUTER_MODELO=deepseek/deepseek-chat
+
+IA_CONTENIDO_GROQ_API_KEY=...
+IA_CONTENIDO_GROQ_MODELO=llama-3.1-8b-instant
+
+IA_CONTENIDO_FALLBACK_LOCAL=false
 ```
 
 Despues reiniciar `uvicorn`.
+
+Imagenes reales tambien pueden usar una cadena simple: OpenAI Images primero y,
+si se configura, un proveedor secundario compatible con el endpoint de
+generacion de imagenes.
+
+```env
+IA_IMAGENES_API_KEY=sk-...
+IA_IMAGENES_MODELO=gpt-image-1
+
+IA_IMAGENES_SECUNDARIO_API_KEY=...
+IA_IMAGENES_SECUNDARIO_MODELO=...
+IA_IMAGENES_SECUNDARIO_URL=https://proveedor.example/v1/images/generations
+```
 
 ## Planes y cuotas
 
@@ -113,13 +141,13 @@ reemplazan orientacion profesional.
 
 ## Estado actual (MVP 1.0)
 
-El contenido pedagogico ya tiene integracion opcional con OpenAI y fallback
-local. Las exportaciones PDF y PPTX se generan como archivos reales en
+El contenido pedagogico ya tiene integracion opcional con varios proveedores de
+IA y fallback local controlado para demo. Las exportaciones PDF y PPTX se generan como archivos reales en
 `backend/generated/exportaciones`.
 
-Los servicios multimedia (`servicio_multimedia.py`) todavia usan placeholders
-funcionales para voz, imagenes y video, de modo que el flujo se pueda probar
-sin depender de APIs externas.
+Los servicios multimedia (`servicio_multimedia.py`) pueden generar voz e
+imagenes reales si hay credenciales; si no, usan placeholders funcionales para
+que el flujo se pueda probar sin depender de APIs externas.
 
 ## Endpoints disponibles
 
