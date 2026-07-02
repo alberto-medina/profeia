@@ -222,6 +222,21 @@ def _restaurar_espanol(texto: str) -> str:
         "cuantos": "cuántos",
         "precision": "precisión",
         "oposicion": "oposición",
+        "companero": "compañero",
+        "companeros": "compañeros",
+        "intencion": "intención",
+        "definicion": "definición",
+        "homogenea": "homogénea",
+        "homogeneas": "homogéneas",
+        "heterogenea": "heterogénea",
+        "heterogeneas": "heterogéneas",
+        "azucar": "azúcar",
+        "eleccion": "elección",
+        "funcion": "función",
+        "reproduccion": "reproducción",
+        "justificacion": "justificación",
+        "Organizacion": "Organización",
+        "organizacion": "organización",
         "oracion": "oración",
         "conversacion": "conversación",
         "pronunciacion": "pronunciación",
@@ -412,6 +427,8 @@ def _tema_en_frase(tema: str) -> str:
         return "del " + tema_limpio[3:]
     if tema_limpio.lower().startswith("la "):
         return "de " + tema_limpio
+    if " y " in tema_limpio or tema_limpio.lower().endswith("s"):
+        return "sobre " + tema_limpio
     return "de " + tema_limpio
 
 
@@ -805,7 +822,241 @@ def _ejemplos_por_materia(clave_materia: str, tema: str, perfil: dict) -> list[s
     ]
 
 
-def _actividad_por_materia(clave_materia: str, perfil: dict) -> str:
+def _detalles_tema(clave_materia: str, tema: str) -> dict:
+    tema_limpio = tema[:1].lower() + tema[1:]
+    texto = _sin_acentos_basico(tema)
+
+    if "futbol" in texto or "pase" in texto or "tiro" in texto:
+        return {
+            "definicion": (
+                "En futbol, un pase sirve para entregar la pelota a un companero "
+                "con control, y un tiro busca enviar la pelota hacia el arco. "
+                "La diferencia central es la intencion: conservar y avanzar con "
+                "el pase, o finalizar una jugada con el tiro."
+            ),
+            "pasos": [
+                "mirar antes de recibir para elegir a quien pasar",
+                "usar el borde interno del pie para pases cortos y precisos",
+                "acompanar la pelota con el cuerpo orientado al objetivo",
+                "en el tiro, apoyar el pie al costado de la pelota y terminar el movimiento hacia el arco",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: dos estudiantes se ubican a cinco metros. El primero "
+                "hace un pase con borde interno al pie del companero; el segundo controla "
+                "y devuelve. Luego repiten apuntando a un cono como si fuera el arco."
+            ),
+            "practica": (
+                "Circuito de practica: estacion 1 pases cortos entre parejas; estacion 2 "
+                "pase y desplazamiento; estacion 3 tiro suave a un arco marcado con conos. "
+                "Cada estacion dura dos minutos y se evalua precision, no fuerza."
+            ),
+            "producto": "una mejora observable en la precision del pase o tiro y una explicacion breve de la decision tomada",
+        }
+
+    if "planta" in texto or "raiz" in texto or "tallo" in texto or "hoja" in texto or "flor" in texto:
+        return {
+            "definicion": (
+                "Una planta es un ser vivo que necesita agua, luz, aire y nutrientes. "
+                "Sus partes cumplen funciones distintas: la raiz absorbe agua, el tallo "
+                "sostiene y transporta, las hojas fabrican alimento y la flor participa "
+                "en la reproduccion."
+            ),
+            "pasos": [
+                "observar una imagen o planta real",
+                "nombrar cada parte visible",
+                "relacionar cada parte con su funcion",
+                "dibujar una planta y rotular raiz, tallo, hojas y flor",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: mostrar una planta en maceta. Preguntar que pasaria "
+                "si no tuviera raiz, luego explicar que no podria absorber agua ni "
+                "sostenerse bien en la tierra."
+            ),
+            "practica": (
+                "Actividad guiada: entregar una imagen de planta sin nombres. Los "
+                "estudiantes completan las etiquetas y escriben una funcion para cada parte."
+            ),
+            "producto": "un dibujo rotulado con funciones simples de cada parte",
+        }
+
+    if "vertebrado" in texto or "invertebrado" in texto:
+        return {
+            "definicion": (
+                "Los animales vertebrados tienen columna vertebral o esqueleto interno; "
+                "los invertebrados no tienen columna vertebral. Esta diferencia ayuda "
+                "a clasificarlos y comparar como se mueven, se protegen y viven."
+            ),
+            "pasos": [
+                "mirar imagenes de animales conocidos",
+                "preguntar si tienen columna vertebral",
+                "separarlos en dos grupos",
+                "justificar la clasificacion con una caracteristica observable",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: perro y pez son vertebrados porque tienen columna; "
+                "mariposa y caracol son invertebrados porque no tienen columna vertebral."
+            ),
+            "practica": (
+                "Clasificacion en tarjetas: cada grupo recibe seis animales, arma dos "
+                "columnas y explica una decision al resto de la clase."
+            ),
+            "producto": "un cuadro comparativo con ejemplos y una justificacion",
+        }
+
+    if "mezcla" in texto and ("homogene" in texto or "heterogene" in texto):
+        return {
+            "definicion": (
+                "Una mezcla homogenea se ve uniforme, como agua con sal disuelta. "
+                "Una mezcla heterogenea permite distinguir sus componentes, como agua "
+                "con arena o una ensalada."
+            ),
+            "pasos": [
+                "observar dos mezclas",
+                "decidir si se distinguen sus componentes",
+                "clasificar como homogenea o heterogenea",
+                "explicar la decision con una frase",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: agua con azucar parece una sola sustancia cuando se "
+                "disuelve, por eso es homogenea; agua con aceite muestra dos partes, "
+                "por eso es heterogenea."
+            ),
+            "practica": (
+                "Experiencia simple: comparar sal en agua, arroz con lentejas y agua "
+                "con aceite. Registrar observacion, tipo de mezcla y justificacion."
+            ),
+            "producto": "una tabla de observacion con clasificacion y justificacion",
+        }
+
+    if "colonial" in texto or "epoca colonial" in texto:
+        return {
+            "definicion": (
+                "La vida en la epoca colonial se organizaba de manera diferente a la "
+                "actual: habia otros trabajos, transportes, viviendas, formas de comprar "
+                "y grupos sociales con derechos desiguales."
+            ),
+            "pasos": [
+                "ubicar la epoca colonial antes de la independencia",
+                "observar una imagen o relato breve",
+                "comparar vida cotidiana colonial y actual",
+                "reconocer cambios y permanencias",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: comparar una pulperia colonial con un comercio actual. "
+                "Preguntar que se vendia, quienes iban y como circulaban las noticias."
+            ),
+            "practica": (
+                "Trabajo con fuente visual: mirar una escena colonial y completar: "
+                "personas, objetos, trabajos, diferencias con la actualidad."
+            ),
+            "producto": "un cuadro de comparacion entre vida colonial y vida actual",
+        }
+
+    if "interrogacion" in texto or "exclamacion" in texto:
+        return {
+            "definicion": (
+                "Los signos de interrogacion se usan para escribir preguntas. Los signos "
+                "de exclamacion se usan para expresar sorpresa, alegria, enojo o una orden "
+                "con fuerza. En espanol se colocan al abrir y al cerrar la oracion."
+            ),
+            "pasos": [
+                "leer la oracion en voz alta",
+                "decidir si pregunta o expresa emocion",
+                "colocar signo de apertura",
+                "colocar signo de cierre",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: 'Donde esta mi cuaderno' se transforma en "
+                "'¿Donde esta mi cuaderno?'. 'Que lindo dia' se transforma en "
+                "'¡Que lindo dia!'."
+            ),
+            "practica": (
+                "Reescritura: entregar seis oraciones sin signos. Los estudiantes colocan "
+                "interrogacion o exclamacion y leen una justificando la eleccion."
+            ),
+            "producto": "oraciones corregidas con signos de apertura y cierre",
+        }
+
+    if "porcentaje" in texto or "descuento" in texto:
+        return {
+            "definicion": (
+                "Un porcentaje representa una parte de cada 100. En descuentos, indica "
+                "cuanto se resta del precio original. Por ejemplo, 10% de 100 pesos son "
+                "10 pesos."
+            ),
+            "pasos": [
+                "identificar precio original",
+                "calcular el porcentaje como parte de 100",
+                "restar el descuento",
+                "escribir precio final",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: una remera cuesta 2000 pesos y tiene 25% de descuento. "
+                "25% de 2000 es 500, entonces el precio final es 1500 pesos."
+            ),
+            "practica": (
+                "Simulacion de tienda: cada grupo recibe tres precios y tarjetas de "
+                "descuento. Calculan descuento y precio final con procedimiento escrito."
+            ),
+            "producto": "tres calculos de descuento con procedimiento y precio final",
+        }
+
+    if clave_materia == "ingles" and ("color" in texto or "aula" in texto or "objet" in texto):
+        return {
+            "definicion": (
+                "En ingles, los colores y objetos del aula sirven para describir lo que "
+                "vemos: red pencil, blue book, green chair. La estructura simple es "
+                "'It is a...' o 'This is a...'."
+            ),
+            "pasos": [
+                "presentar vocabulario con imagen o gesto",
+                "repetir pronunciacion",
+                "unir color y objeto",
+                "decir una frase corta",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: mostrar un lapiz rojo y decir 'This is a red pencil'. "
+                "Luego mostrar un libro azul y decir 'It is a blue book'."
+            ),
+            "practica": (
+                "Busqueda en el aula: cada estudiante elige un objeto, nombra color y "
+                "objeto en ingles y arma una frase con ayuda del modelo."
+            ),
+            "producto": "tres frases cortas en ingles con color y objeto",
+        }
+
+    return {
+        "definicion": (
+            f"{tema_limpio} es el contenido central de la clase. Para trabajarlo, "
+            "conviene presentarlo como una idea clara, mostrar un caso concreto, "
+            "practicar con una consigna breve y cerrar con una explicacion en palabras propias."
+        ),
+        "pasos": [
+            "nombrar la idea principal",
+            "mirar un ejemplo concreto",
+            "resolver una consigna guiada",
+            "explicar que se aprendio con palabras propias",
+        ],
+        "ejemplo_modelado": (
+            f"Ejemplo modelado: el docente presenta una situacion breve sobre {tema_limpio}, "
+            "piensa en voz alta como resolverla y marca las palabras clave que ayudan "
+            "a entender el tema."
+        ),
+        "practica": (
+            "Practica guiada: los estudiantes resuelven una version parecida del ejemplo, "
+            "primero con ayuda y luego de manera mas autonoma."
+        ),
+        "producto": perfil["producto"],
+    }
+
+
+def _actividad_por_materia(clave_materia: str, perfil: dict, detalle: dict | None = None) -> str:
+    if detalle:
+        return (
+            f"Actividad principal: {detalle['practica']} "
+            "Organizacion sugerida: 2 minutos de explicacion, 3 minutos de practica "
+            "guiada, 2 minutos de produccion y 1 minuto de cierre oral."
+        )
     if clave_materia == "educacion fisica":
         return (
             "Actividad principal: entrada en calor breve, demostracion tecnica, "
@@ -837,8 +1088,12 @@ def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagog
     tema_minuscula = tema[:1].lower() + tema[1:]
     tema_frase = _tema_en_frase(tema_minuscula)
     perfil = _perfil_materia(materia, solicitud.prompt_original)
-    ejemplos = _ejemplos_por_materia(clave_materia, tema, perfil)
-    actividad = _actividad_por_materia(clave_materia, perfil)
+    detalle = _detalles_tema(clave_materia, tema)
+    ejemplos = [
+        detalle["ejemplo_modelado"],
+        *[f"Paso {indice + 1}: {paso}." for indice, paso in enumerate(detalle["pasos"])],
+    ]
+    actividad = _actividad_por_materia(clave_materia, perfil, detalle)
 
     if _es_tema_tablas(solicitud.prompt_original, tema):
         return _normalizar_contenido_espanol(
@@ -863,11 +1118,12 @@ def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagog
             "que la clase tendra explicacion breve, ejemplo guiado, practica y cierre."
         ),
         explicacion=(
-            f"Explicar {tema_minuscula} con una definicion corta y una situacion concreta. "
-            f"El foco de la materia sera {perfil['eje']}. Para trabajar sin depender de "
-            f"IA paga, el docente puede {perfil['estrategia']}. Avanzar en tres pasos: "
-            "nombrar la idea principal, mostrar un ejemplo guiado y pedir una aplicacion "
-            "breve. Si aparecen dudas, volver al ejemplo y separar la consigna en partes."
+            f"{detalle['definicion']} "
+            f"El foco de la materia sera {perfil['eje']}. "
+            "Para que la clase no quede solo en una definicion, conviene trabajarla "
+            "en cuatro momentos: observar o escuchar una situacion, identificar la "
+            "idea importante, practicar con ayuda y explicar el resultado. "
+            "Si aparecen dudas, volver al ejemplo y separar la consigna en pasos."
         ),
         ejemplos=ejemplos,
         actividad=actividad,
@@ -880,9 +1136,9 @@ def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagog
         ],
         cuestionario=[
             f"Explica en una oracion la idea principal de {tema_minuscula}.",
-            "Marca o escribe un ejemplo correcto y justifica tu eleccion con una frase.",
-            f"Completa una consigna breve usando esta estrategia: {perfil['estrategia']}.",
-            f"Produce {perfil['producto']} sobre el tema trabajado.",
+            f"Escribe un ejemplo concreto sobre {tema_minuscula} y justifica por que corresponde.",
+            f"Ordena estos pasos de trabajo: {', '.join(detalle['pasos'][:3])}.",
+            f"Produce {detalle['producto']} sobre el tema trabajado.",
             "Escribe una duda o una idea que quieras seguir practicando.",
         ],
         tarea_hogar=(
@@ -891,9 +1147,10 @@ def _generar_contenido_local(solicitud: SolicitudCrearClase) -> ContenidoPedagog
             "compartir en la proxima clase."
         ),
         resumen=(
-            f"Hoy vimos la idea central de {tema_minuscula}, la conectamos con ejemplos "
-            "cercanos y practicamos una aplicacion breve. Para cerrar, cada "
-            "estudiante deberia poder explicar el tema con un ejemplo propio."
+            f"Hoy trabajamos {tema_frase} a partir de una explicacion simple, un "
+            "ejemplo modelado y una practica guiada. Lo importante es que cada "
+            f"estudiante pueda reconocer la idea central, dar un ejemplo y producir "
+            f"{detalle['producto']}."
         ),
     ))
 
