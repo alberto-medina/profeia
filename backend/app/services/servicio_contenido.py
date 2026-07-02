@@ -496,12 +496,19 @@ def _nombre_materia_visible(materia: str, prompt_original: str) -> str:
 
 
 def _consulta_wikipedia(solicitud: SolicitudCrearClase, tema: str) -> str:
-    clave = _clave_materia(solicitud.materia, solicitud.prompt_original)
     if _es_pedido_generico(solicitud.prompt_original):
         return ""
-    if clave in {"ingles", "educacion fisica"}:
-        return ""
-    return _normalizar_espacios(tema)
+    materia = _nombre_materia_visible(solicitud.materia, solicitud.prompt_original)
+    texto = _sin_acentos_basico(tema)
+    if "mezcla" in texto and ("homogene" in texto or "heterogene" in texto):
+        return "mezcla homogénea mezcla heterogénea"
+    if "planta" in texto or "raiz" in texto or "tallo" in texto or "hoja" in texto:
+        return "partes de la planta raíz tallo hojas flor"
+    if "vertebrado" in texto or "invertebrado" in texto:
+        return "animal vertebrado animal invertebrado"
+    if "colonial" in texto:
+        return "época colonial vida cotidiana"
+    return _normalizar_espacios(f"{tema} {materia}")
 
 
 def _raiz_relevancia(palabra: str) -> str:
@@ -525,6 +532,14 @@ def _terminos_relevantes(consulta: str) -> list[str]:
         "anos",
         "años",
         "tema",
+        "educacion",
+        "fisica",
+        "ciencias",
+        "naturales",
+        "sociales",
+        "lengua",
+        "ingles",
+        "matematica",
     }
     terminos = []
     for palabra in re.findall(r"[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9]+", consulta):
@@ -542,7 +557,49 @@ def _contexto_wikipedia_relevante(consulta: str, titulo: str, extracto: str) -> 
     if not terminos:
         return False
     texto = _sin_acentos_basico(f"{titulo} {extracto}")
-    return any(termino in texto for termino in terminos)
+    encontrados = [termino for termino in terminos if termino in texto]
+    if "homogene" in terminos and "heterogene" in terminos:
+        return "homogene" in encontrados and "heterogene" in encontrados
+    if len(terminos) >= 3:
+        return len(encontrados) >= 2
+    return bool(encontrados)
+
+
+def _puntuar_contexto_web(consulta: str, titulo: str, extracto: str) -> int:
+    terminos = _terminos_relevantes(consulta)
+    texto_titulo = _sin_acentos_basico(titulo)
+    texto_extracto = _sin_acentos_basico(extracto)
+    puntaje = 0
+    for termino in terminos:
+        if termino in texto_titulo:
+            puntaje += 3
+        if termino in texto_extracto:
+            puntaje += 1
+    penalizadas = ["desambiguacion", "apellido", "album", "pelicula", "cancion"]
+    if any(palabra in texto_titulo for palabra in penalizadas):
+        puntaje -= 3
+    return puntaje
+
+
+def _recortar_oracion(texto: str, maximo: int = 230) -> str:
+    texto_limpio = _normalizar_espacios(texto)
+    if len(texto_limpio) <= maximo:
+        return texto_limpio
+    return texto_limpio[:maximo].rsplit(" ", 1)[0].strip(" ,;") + "."
+
+
+def _oraciones_contexto(resumen: str, cantidad: int = 3) -> list[str]:
+    partes = re.split(r"(?<=[.!?])\s+", _normalizar_espacios(resumen))
+    oraciones = []
+    for parte in partes:
+        parte = parte.strip()
+        if len(parte) < 35:
+            continue
+        if parte not in oraciones:
+            oraciones.append(_recortar_oracion(parte))
+        if len(oraciones) >= cantidad:
+            break
+    return oraciones
 
 
 async def _buscar_contexto_wikipedia(consulta: str) -> dict | None:
@@ -554,7 +611,7 @@ async def _buscar_contexto_wikipedia(consulta: str) -> dict | None:
         "format": "json",
         "list": "search",
         "srsearch": consulta,
-        "srlimit": 1,
+        "srlimit": 5,
         "origin": "*",
     }
     try:
@@ -565,41 +622,61 @@ async def _buscar_contexto_wikipedia(consulta: str) -> dict | None:
             if not resultados:
                 return None
 
-            titulo = resultados[0].get("title")
-            if not titulo:
-                return None
+            mejor_contexto = None
+            mejor_puntaje = 0
 
-            params_extracto = {
-                "action": "query",
-                "format": "json",
-                "prop": "extracts|info",
-                "exintro": "1",
-                "explaintext": "1",
-                "inprop": "url",
-                "titles": titulo,
-                "origin": "*",
-            }
-            respuesta_extracto = await cliente.get(WIKIPEDIA_API_URL, params=params_extracto)
-            respuesta_extracto.raise_for_status()
-            paginas = (respuesta_extracto.json().get("query") or {}).get("pages") or {}
-            pagina = next(iter(paginas.values()), {})
-            extracto = _normalizar_espacios(pagina.get("extract", ""))
-            if not extracto:
-                return None
-            titulo_final = pagina.get("title") or titulo
-            if not _contexto_wikipedia_relevante(consulta, titulo_final, extracto):
+            for resultado in resultados:
+                titulo = resultado.get("title")
+                if not titulo:
+                    continue
+                snippet = re.sub("<.*?>", " ", str(resultado.get("snippet") or ""))
+                if not _contexto_wikipedia_relevante(consulta, titulo, snippet):
+                    continue
+
+                params_extracto = {
+                    "action": "query",
+                    "format": "json",
+                    "prop": "extracts|info",
+                    "exintro": "1",
+                    "explaintext": "1",
+                    "inprop": "url",
+                    "titles": titulo,
+                    "origin": "*",
+                }
+                respuesta_extracto = await cliente.get(WIKIPEDIA_API_URL, params=params_extracto)
+                respuesta_extracto.raise_for_status()
+                paginas = (respuesta_extracto.json().get("query") or {}).get("pages") or {}
+                pagina = next(iter(paginas.values()), {})
+                extracto = _normalizar_espacios(pagina.get("extract", ""))
+                if not extracto:
+                    continue
+                titulo_final = pagina.get("title") or titulo
+                puntaje = _puntuar_contexto_web(consulta, titulo_final, extracto)
+                if puntaje > mejor_puntaje:
+                    mejor_puntaje = puntaje
+                    mejor_contexto = {
+                        "titulo": titulo_final,
+                        "resumen": extracto,
+                        "url": pagina.get("fullurl"),
+                        "puntaje": puntaje,
+                    }
+
+            if not mejor_contexto or not _contexto_wikipedia_relevante(
+                consulta,
+                mejor_contexto["titulo"],
+                mejor_contexto["resumen"],
+            ):
                 print(
                     "[servicio_contenido] Wikipedia devolvio un resultado poco "
                     f"relevante para '{consulta}'; se descarta."
                 )
                 return None
+            extracto = mejor_contexto["resumen"]
             if len(extracto) > 650:
                 extracto = extracto[:650].rsplit(" ", 1)[0].strip() + "."
-            return {
-                "titulo": titulo_final,
-                "resumen": extracto,
-                "url": pagina.get("fullurl"),
-            }
+            mejor_contexto["resumen"] = extracto
+            mejor_contexto["ideas"] = _oraciones_contexto(extracto)
+            return mejor_contexto
     except (httpx.HTTPError, ValueError) as error:
         print(
             "[servicio_contenido] Wikipedia no disponible; "
@@ -619,21 +696,33 @@ def _aplicar_contexto_web(
     resumen = contexto.get("resumen", "")
     titulo = contexto.get("titulo", "")
     url = contexto.get("url")
+    ideas = contexto.get("ideas") or _oraciones_contexto(resumen)
+    idea_principal = ideas[0] if ideas else resumen
 
     datos["explicacion"] = (
-        datos["explicacion"]
-        + "\n\nContexto de referencia abierto: "
-        + resumen
+        datos["explicacion"].rstrip()
+        + "\n\nFuente abierta consultada para enriquecer la clase: "
+        + _recortar_oracion(idea_principal, 420)
     )
-    datos["ejemplos"] = (datos.get("ejemplos") or [])[:4] + [
-        f"Recurso de consulta: revisar una fuente abierta sobre {titulo} y extraer tres palabras clave para discutir en clase."
+    ejemplos_web = [
+        f"Idea de fuente abierta: {idea}"
+        for idea in ideas[:2]
     ]
-    datos["preguntas"] = (datos.get("preguntas") or [])[:5] + [
-        f"Que dato del contexto de {titulo} ayuda a entender mejor el tema?"
+    datos["ejemplos"] = (datos.get("ejemplos") or [])[:3] + ejemplos_web + [
+        f"Trabajo con fuente: leer el resumen de {titulo}, subrayar tres palabras clave y explicar como se conectan con la actividad."
     ]
-    datos["cuestionario"] = (datos.get("cuestionario") or [])[:5] + [
-        "Escribe una idea tomada del recurso de consulta y relacionala con la actividad de clase."
+    datos["preguntas"] = (datos.get("preguntas") or [])[:4] + [
+        f"Que dato de la fuente sobre {titulo} ayuda a entender mejor el tema?",
+        "Que ejemplo propio podrias armar usando esa informacion?",
     ]
+    datos["cuestionario"] = (datos.get("cuestionario") or [])[:4] + [
+        "Escribe una idea tomada de la fuente abierta y relacionala con el ejemplo trabajado.",
+        "Anota una palabra clave de la fuente, su significado y una oracion propia.",
+    ]
+    datos["tarea_hogar"] = (
+        str(datos.get("tarea_hogar") or "").rstrip()
+        + f" Ademas, revisar la fuente sugerida sobre {titulo} y copiar una idea que sirva para explicar mejor el tema."
+    )
     fuente = f" Fuente sugerida: {url}" if url else ""
     datos["resumen"] = datos["resumen"] + fuente
     return _normalizar_contenido_espanol(ContenidoPedagogico.model_validate(datos))

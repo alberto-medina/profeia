@@ -306,6 +306,10 @@ Flujo alumno:
 - Se agrego un validador local de flujo completo en
   `scripts/validar_flujo_local.py` para probar sin Supabase real ni IA paga:
   genera clase, recursos, vista alumno, PDF y ZIP desde backend.
+- Se reforzo la generacion local con internet: cuando OpenAI no esta disponible,
+  la app intenta enriquecer temas random con Wikipedia, elige mejor entre varios
+  resultados, descarta fuentes tangenciales y usa ideas de la fuente para
+  mejorar explicacion, ejemplos, preguntas, cuestionario y tarea.
 
 ## Matriz de IA recomendada
 
@@ -381,6 +385,9 @@ Cada plan puede limitar:
 
 - La IA debe ayudar al docente, no reemplazarlo.
 - El docente siempre debe poder editar.
+- Cuando haya internet, ProfeIA debe apoyarse en fuentes abiertas antes de caer
+  en plantillas genericas; el modo local sin IA debe ser una red de seguridad,
+  no la experiencia principal vendible.
 - Las adaptaciones para TDAH/TEA deben ser respetuosas, pedagogicas y no
   clinicas.
 - La voz clonada debe requerir consentimiento claro.
