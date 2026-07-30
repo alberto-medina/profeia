@@ -8,6 +8,9 @@
             pos: self.pos
             size: self.size
 
+<ScrollView>:
+    do_scroll_x: False
+
 <EtiquetaSeccion@MDLabel>:
     font_style: "H6"
     bold: True
@@ -18,8 +21,18 @@
     halign: "left"
     text_size: self.width, None
 
+<EtiquetaPaso@MDLabel>:
+    font_style: "Caption"
+    theme_text_color: "Custom"
+    text_color: app.color_texto_secundario
+    size_hint_y: None
+    height: dp(22)
+    halign: "center"
+    text_size: self.width, None
+
 <MDTextField>:
     write_tab: False
+    font_size: "17sp"
 
 <CampoTextoLargo@MDTextField>:
     multiline: True
@@ -32,10 +45,12 @@
     text_color: 1, 1, 1, 1
     line_color: app.color_azul
     size_hint_x: 1
+    font_size: "15sp"
 
 <MDFlatButton>:
     text_color: app.color_azul
     size_hint_x: 1
+    font_size: "15sp"
 
 <ItemNav@BoxLayout>:
     nombre_pantalla: ""
@@ -159,6 +174,13 @@
                 height: dp(24)
                 theme_text_color: "Custom"
                 text_color: app.color_texto_secundario
+
+            MDIconButton:
+                icon: "volume-high"
+                pos_hint: {"center_x": 0.5}
+                theme_text_color: "Custom"
+                text_color: app.color_texto_secundario
+                on_release: root.al_presionar_escuchar_ayuda()
 
             Widget:
                 size_hint_y: None
@@ -431,8 +453,21 @@
                 theme_text_color: "Custom"
                 text_color: app.color_texto
 
-        EtiquetaSeccion:
-            text: "Que queres ensenar hoy?"
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: dp(38)
+
+            EtiquetaSeccion:
+                text: "Que queres ensenar hoy?"
+
+            MDIconButton:
+                icon: "volume-high"
+                size_hint_x: None
+                width: dp(38)
+                theme_text_color: "Custom"
+                text_color: app.color_texto_secundario
+                on_release: root.al_presionar_escuchar_ayuda()
 
         ScrollView:
             BoxLayout:
@@ -558,6 +593,30 @@
                             hint_text: "Materia *"
                             text: ""
                             on_text: root.al_cambiar_prompt(self.text)
+
+                    MDLabel:
+                        id: etiqueta_recientes
+                        text: "Usados antes: toca para completar"
+                        font_style: "Caption"
+                        size_hint_y: None
+                        height: dp(18) if self.text else 0
+                        opacity: 1 if self.text else 0
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto_secundario
+
+                    MDBoxLayout:
+                        id: contenedor_edades_recientes
+                        orientation: "horizontal"
+                        spacing: dp(6)
+                        size_hint_y: None
+                        height: self.minimum_height
+
+                    MDBoxLayout:
+                        id: contenedor_materias_recientes
+                        orientation: "horizontal"
+                        spacing: dp(6)
+                        size_hint_y: None
+                        height: self.minimum_height
 
                 MDLabel:
                     id: etiqueta_error
@@ -796,6 +855,9 @@
             title: "Tu clase generada"
             accion_volver: root.al_presionar_atras
 
+        EtiquetaPaso:
+            text: "Paso 1 de 5"
+
         BoxLayout:
             orientation: "vertical"
             padding: dp(16)
@@ -901,6 +963,9 @@
         BarraSuperior:
             title: "Adaptar la clase"
             accion_volver: root.al_presionar_atras
+
+        EtiquetaPaso:
+            text: "Paso 2 de 5"
 
         ScrollView:
             BoxLayout:
@@ -1096,6 +1161,9 @@
             title: "Elegir recursos"
             accion_volver: root.al_presionar_atras
 
+        EtiquetaPaso:
+            text: "Paso 3 de 5"
+
         EtiquetaSeccion:
             text: "Que recursos queres usar?"
 
@@ -1273,6 +1341,9 @@
             title: "Elegir voz"
             accion_volver: root.al_presionar_atras
 
+        EtiquetaPaso:
+            text: "Paso 4 de 5"
+
         ScrollView:
             BoxLayout:
                 orientation: "vertical"
@@ -1361,6 +1432,9 @@
         BarraSuperior:
             title: "Estructura del video"
             accion_volver: root.al_presionar_atras
+
+        EtiquetaPaso:
+            text: "Paso 4 de 5"
 
         ScrollView:
             BoxLayout:
@@ -1720,6 +1794,9 @@
         BarraSuperior:
             title: "Exportar tu clase"
             accion_volver: root.al_presionar_atras
+
+        EtiquetaPaso:
+            text: "Paso 5 de 5"
 
         EtiquetaSeccion:
             text: "Exportar tu clase"

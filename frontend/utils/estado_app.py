@@ -12,6 +12,8 @@ import os
 from kivy.app import App
 
 NOMBRE_ARCHIVO_SESION = "sesion_docente.json"
+NOMBRE_ARCHIVO_PREFERENCIAS = "preferencias_recientes.json"
+MAX_VALORES_RECIENTES = 6
 
 
 class EstadoApp:
@@ -166,3 +168,53 @@ class EstadoApp:
                 os.remove(ruta)
             except OSError as error:
                 print(f"[EstadoApp] No se pudo borrar la sesion: {error}")
+
+    def _ruta_datos_locales(self, nombre_archivo: str) -> str | None:
+        app = App.get_running_app()
+        if app is None:
+            return None
+        return os.path.join(app.user_data_dir, nombre_archivo)
+
+    def _cargar_json(self, ruta: str) -> dict | None:
+        if not os.path.exists(ruta):
+            return None
+        try:
+            with open(ruta, "r", encoding="utf-8") as archivo:
+                return json.load(archivo)
+        except (OSError, ValueError):
+            return None
+
+    def _guardar_json(self, ruta: str, datos: dict) -> None:
+        try:
+            os.makedirs(os.path.dirname(ruta), exist_ok=True)
+            with open(ruta, "w", encoding="utf-8") as archivo:
+                json.dump(datos, archivo, ensure_ascii=False)
+        except OSError as error:
+            print(f"[EstadoApp] No se pudo guardar preferencias: {error}")
+
+    def registrar_valor_reciente(self, campo: str, valor: str) -> None:
+        """Guarda un valor usado (ej. materia, edad) para sugerirlo la
+        proxima vez como chip tocable, en vez de tener que escribirlo de
+        nuevo. Pensado sobre todo para quienes no estan comodos escribiendo
+        en el celular (docentes mayores, poca destreza tactil, etc.).
+        """
+        valor_limpio = (valor or "").strip()
+        if not valor_limpio:
+            return
+        ruta = self._ruta_datos_locales(NOMBRE_ARCHIVO_PREFERENCIAS)
+        if not ruta:
+            return
+        datos = self._cargar_json(ruta) or {}
+        valores = datos.get(campo) or []
+        valores = [v for v in valores if v.strip().lower() != valor_limpio.lower()]
+        valores.insert(0, valor_limpio)
+        datos[campo] = valores[:MAX_VALORES_RECIENTES]
+        self._guardar_json(ruta, datos)
+
+    def obtener_valores_recientes(self, campo: str) -> list[str]:
+        """Devuelve los ultimos valores usados para un campo (mas reciente primero)."""
+        ruta = self._ruta_datos_locales(NOMBRE_ARCHIVO_PREFERENCIAS)
+        if not ruta:
+            return []
+        datos = self._cargar_json(ruta) or {}
+        return datos.get(campo) or []

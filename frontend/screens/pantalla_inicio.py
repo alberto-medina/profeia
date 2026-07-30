@@ -7,8 +7,9 @@ generacion de la clase.
 
 from kivy.uix.screenmanager import Screen
 from kivymd.app import MDApp
+from kivymd.uix.chip import MDChip
 
-from utils import cliente_api
+from utils import cliente_api, voz_nativa
 
 
 PLANTILLAS_CLASE = {
@@ -86,6 +87,45 @@ class PantallaInicio(Screen):
 
     def on_pre_enter(self, *args):
         self._actualizar_sugerencias()
+        self._actualizar_valores_recientes()
+
+    def al_presionar_escuchar_ayuda(self):
+        """Lee en voz alta como usar esta pantalla (ayuda de accesibilidad,
+        solo funciona en Android; en Windows/Linux no hace nada)."""
+        voz_nativa.leer_texto(
+            "Describi que clase queres crear, elegi la duracion, "
+            "completa la edad o grado y la materia, y toca generar clase."
+        )
+
+    def _actualizar_valores_recientes(self):
+        """Muestra como chips tocables los valores de edad/materia que el
+        docente ya uso antes, para que no tenga que volver a escribirlos.
+        """
+        if "contenedor_edades_recientes" not in self.ids:
+            return
+        app = MDApp.get_running_app()
+
+        edades = app.estado.obtener_valores_recientes("edad_publico")
+        materias = app.estado.obtener_valores_recientes("materia")
+
+        self._poblar_chips_recientes(
+            self.ids.contenedor_edades_recientes, edades, self.ids.campo_edad
+        )
+        self._poblar_chips_recientes(
+            self.ids.contenedor_materias_recientes, materias, self.ids.campo_materia
+        )
+        self.ids.etiqueta_recientes.text = (
+            "Usados antes: toca para completar" if (edades or materias) else ""
+        )
+
+    def _poblar_chips_recientes(self, contenedor, valores, campo_destino):
+        contenedor.clear_widgets()
+        for valor in valores:
+            chip = MDChip(text=valor)
+            chip.bind(
+                on_release=lambda _chip, valor=valor: setattr(campo_destino, "text", valor)
+            )
+            contenedor.add_widget(chip)
 
     def al_presionar_plantilla(self, tipo: str):
         prompt_actual = self.ids.campo_prompt.text.strip()
@@ -179,6 +219,9 @@ class PantallaInicio(Screen):
         self.ids.etiqueta_error.text = ""
         self.ids.boton_generar.disabled = True
         self.ids.indicador_carga.active = True
+
+        estado.registrar_valor_reciente("edad_publico", edad_publico)
+        estado.registrar_valor_reciente("materia", materia)
 
         duracion_minutos = int(self.ids.grupo_duracion.selected.text.replace(" min", ""))
 

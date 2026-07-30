@@ -8,6 +8,8 @@ docente (va a las pantallas de login / registro, cada una independiente).
 from kivy.uix.screenmanager import Screen
 from kivymd.app import MDApp
 
+from utils import voz_nativa
+
 
 class PantallaEntrada(Screen):
     """Primera pantalla de la app: elegir alumno o docente."""
@@ -17,6 +19,16 @@ class PantallaEntrada(Screen):
             self.ids.etiqueta_error.text = ""
         if "campo_codigo" in self.ids:
             self.ids.campo_codigo.text = ""
+
+    def al_presionar_escuchar_ayuda(self):
+        """Lee en voz alta como usar esta pantalla (ayuda de accesibilidad,
+        solo funciona en Android; en Windows/Linux no hace nada)."""
+        voz_nativa.leer_texto(
+            "Bienvenido a ProfeIA, el copiloto de inteligencia artificial "
+            "para docentes. Si sos alumno, ingresa el codigo que te dio tu "
+            "docente y toca entrar como alumno. Si sos docente, toca "
+            "ingresar o crear cuenta docente."
+        )
 
     def al_presionar_entrar_alumno(self):
         app = MDApp.get_running_app()

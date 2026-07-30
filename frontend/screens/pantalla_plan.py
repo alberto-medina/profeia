@@ -279,9 +279,37 @@ class PantallaPlan(Screen):
         print(f"[PantallaPlan] error eliminar cuenta: {error}")
 
     def al_presionar_cerrar_sesion(self):
-        app = MDApp.get_running_app()
-        app.estado.cerrar_sesion()
-        app.root.current = "entrada"
+        """Pide confirmacion antes de cerrar sesion, para que un toque
+        accidental no saque al docente de la app sin querer (mas importante
+        cuanto menos comoda es la navegacion tactil para el usuario)."""
+        layout = BoxLayout(orientation="vertical", spacing=12, padding=(16, 8))
+        popup = Popup(
+            title="Cerrar sesion",
+            content=layout,
+            size_hint=(0.85, 0.32),
+        )
+
+        mensaje = MDLabel(
+            text="Seguro que queres cerrar tu sesion?",
+            size_hint_y=None,
+            height=48,
+            text_size=(300, None),
+            theme_text_color="Secondary",
+        )
+        acciones = BoxLayout(orientation="horizontal", spacing=8, size_hint_y=None, height=48)
+
+        def confirmar(*args):
+            popup.dismiss()
+            app = MDApp.get_running_app()
+            app.estado.cerrar_sesion()
+            app.root.current = "entrada"
+
+        acciones.add_widget(MDFlatButton(text="CANCELAR", on_release=lambda *args: popup.dismiss()))
+        acciones.add_widget(MDRectangleFlatButton(text="CERRAR SESION", on_release=confirmar))
+
+        layout.add_widget(mensaje)
+        layout.add_widget(acciones)
+        popup.open()
 
     def al_presionar_volver(self):
         MDApp.get_running_app().root.current = "inicio"
