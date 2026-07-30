@@ -76,6 +76,7 @@ class ProfeIAApp(MDApp):
         # Estado global accesible desde cualquier pantalla via
         # MDApp.get_running_app().estado
         self.estado = EstadoApp()
+        sesion_restaurada = self.estado.cargar_sesion()
 
         gestor_pantallas = ScreenManager()
         gestor_pantallas.add_widget(PantallaEntrada(name="entrada"))
@@ -92,6 +93,9 @@ class ProfeIAApp(MDApp):
         gestor_pantallas.add_widget(PantallaVoz(name="voz"))
         gestor_pantallas.add_widget(PantallaVideo(name="video"))
         gestor_pantallas.add_widget(PantallaExportar(name="exportar"))
+
+        if sesion_restaurada:
+            gestor_pantallas.current = "inicio"
 
         return gestor_pantallas
 

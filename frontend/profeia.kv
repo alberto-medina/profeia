@@ -897,118 +897,124 @@
 <PantallaAdaptar>:
     BoxLayout:
         orientation: "vertical"
-        padding: dp(16)
-        spacing: dp(12)
 
         BarraSuperior:
             title: "Adaptar la clase"
             accion_volver: root.al_presionar_atras
 
-        MDLabel:
-            text: "Opcional: genera apoyos para estudiantes que necesitan mas estructura, pausas o consignas simples."
-            size_hint_y: None
-            height: dp(58)
-            text_size: self.width, None
-            theme_text_color: "Secondary"
-
-        TarjetaSeccion:
-
+        ScrollView:
             BoxLayout:
+                orientation: "vertical"
+                padding: dp(16)
+                spacing: dp(12)
                 size_hint_y: None
-                height: dp(40)
-                MDCheckbox:
-                    id: check_tdah
-                    active: True
-                    size_hint_x: None
-                    width: dp(48)
+                height: max(self.minimum_height, root.height - dp(56))
+
                 MDLabel:
-                    text: "Atencion / TDAH"
+                    text: "Opcional: genera apoyos para estudiantes que necesitan mas estructura, pausas o consignas simples."
+                    size_hint_y: None
+                    height: dp(58)
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
 
-            BoxLayout:
-                size_hint_y: None
-                height: dp(40)
-                MDCheckbox:
-                    id: check_tea
+                TarjetaSeccion:
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_tdah
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Atencion / TDAH"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_tea
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "TEA / autismo"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_lectura
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Lectura facil"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_ansiedad
+                            active: False
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Ansiedad / participacion gradual"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_rutina
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Rutina visual"
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(40)
+                        MDCheckbox:
+                            id: check_pausas
+                            active: True
+                            size_hint_x: None
+                            width: dp(48)
+                        MDLabel:
+                            text: "Pausas breves"
+
+                MDLabel:
+                    id: etiqueta_estado
+                    size_hint_y: None
+                    height: dp(34)
+                    halign: "center"
+                    text_size: self.width, None
+                    theme_text_color: "Secondary"
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    spacing: dp(10)
+                    size_hint_y: None
+                    height: dp(48)
+
+                    MDFlatButton:
+                        id: boton_saltar
+                        text: "SALTAR"
+                        on_release: root.al_presionar_saltar()
+
+                    MDRectangleFlatButton:
+                        id: boton_generar
+                        text: "GENERAR APOYOS"
+                        on_release: root.al_presionar_generar_apoyos()
+
+                MDSpinner:
+                    id: indicador_carga
+                    size_hint: None, None
+                    size: dp(36), dp(36)
+                    pos_hint: {"center_x": 0.5}
                     active: False
-                    size_hint_x: None
-                    width: dp(48)
-                MDLabel:
-                    text: "TEA / autismo"
-
-            BoxLayout:
-                size_hint_y: None
-                height: dp(40)
-                MDCheckbox:
-                    id: check_lectura
-                    active: True
-                    size_hint_x: None
-                    width: dp(48)
-                MDLabel:
-                    text: "Lectura facil"
-
-            BoxLayout:
-                size_hint_y: None
-                height: dp(40)
-                MDCheckbox:
-                    id: check_ansiedad
-                    active: False
-                    size_hint_x: None
-                    width: dp(48)
-                MDLabel:
-                    text: "Ansiedad / participacion gradual"
-
-            BoxLayout:
-                size_hint_y: None
-                height: dp(40)
-                MDCheckbox:
-                    id: check_rutina
-                    active: True
-                    size_hint_x: None
-                    width: dp(48)
-                MDLabel:
-                    text: "Rutina visual"
-
-            BoxLayout:
-                size_hint_y: None
-                height: dp(40)
-                MDCheckbox:
-                    id: check_pausas
-                    active: True
-                    size_hint_x: None
-                    width: dp(48)
-                MDLabel:
-                    text: "Pausas breves"
-
-        MDLabel:
-            id: etiqueta_estado
-            size_hint_y: None
-            height: dp(34)
-            halign: "center"
-            text_size: self.width, None
-            theme_text_color: "Secondary"
-
-        BoxLayout:
-            orientation: "horizontal"
-            spacing: dp(10)
-            size_hint_y: None
-            height: dp(48)
-
-            MDFlatButton:
-                id: boton_saltar
-                text: "SALTAR"
-                on_release: root.al_presionar_saltar()
-
-            MDRectangleFlatButton:
-                id: boton_generar
-                text: "GENERAR APOYOS"
-                on_release: root.al_presionar_generar_apoyos()
-
-        MDSpinner:
-            id: indicador_carga
-            size_hint: None, None
-            size: dp(36), dp(36)
-            pos_hint: {"center_x": 0.5}
-            active: False
 
 
 <PantallaApoyo>:
@@ -1260,132 +1266,145 @@
 <PantallaVoz>:
     BoxLayout:
         orientation: "vertical"
-        padding: dp(16)
-        spacing: dp(12)
 
         BarraSuperior:
             title: "Elegir voz"
             accion_volver: root.al_presionar_atras
 
-        EtiquetaSeccion:
-            text: "Elegir voz"
-
-        TarjetaSeccion:
-            MDBoxLayout:
-                id: grupo_voz
+        ScrollView:
+            BoxLayout:
                 orientation: "vertical"
-                spacing: dp(8)
+                padding: dp(16)
+                spacing: dp(12)
                 size_hint_y: None
-                height: dp(180)
-                selected: opcion_femenina
+                height: max(self.minimum_height, root.height - dp(56))
 
-                MDChip:
-                    id: opcion_clonada
-                    text: "Clonar mi voz"
-                    valor_interno: "clonada"
-                    on_release: grupo_voz.selected = self
+                EtiquetaSeccion:
+                    text: "Elegir voz"
 
-                MDChip:
-                    id: opcion_masculina
-                    text: "Voz masculina"
-                    valor_interno: "masculina"
-                    on_release: grupo_voz.selected = self
+                TarjetaSeccion:
+                    MDBoxLayout:
+                        id: grupo_voz
+                        orientation: "vertical"
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(180)
+                        selected: opcion_femenina
 
-                MDChip:
-                    id: opcion_femenina
-                    text: "Voz femenina"
-                    valor_interno: "femenina"
-                    on_release: grupo_voz.selected = self
+                        MDChip:
+                            id: opcion_clonada
+                            text: "Clonar mi voz"
+                            valor_interno: "clonada"
+                            on_release: grupo_voz.selected = self
 
-                MDChip:
-                    id: opcion_infantil
-                    text: "Voz infantil"
-                    valor_interno: "infantil"
-                    on_release: grupo_voz.selected = self
+                        MDChip:
+                            id: opcion_masculina
+                            text: "Voz masculina"
+                            valor_interno: "masculina"
+                            on_release: grupo_voz.selected = self
 
-            MDLabel:
-                text: "Idioma: Espanol"
-                size_hint_y: None
-                height: dp(30)
+                        MDChip:
+                            id: opcion_femenina
+                            text: "Voz femenina"
+                            valor_interno: "femenina"
+                            on_release: grupo_voz.selected = self
 
-            MDLabel:
-                text: "Velocidad"
-                size_hint_y: None
-                height: dp(24)
+                        MDChip:
+                            id: opcion_infantil
+                            text: "Voz infantil"
+                            valor_interno: "infantil"
+                            on_release: grupo_voz.selected = self
 
-            MDSlider:
-                id: slider_velocidad
-                min: 0.5
-                max: 1.5
-                value: 0.9
-                step: 0.05
+                    MDLabel:
+                        text: "Idioma: Espanol"
+                        size_hint_y: None
+                        height: dp(30)
 
-        MDLabel:
-            id: etiqueta_error
-            theme_text_color: "Error"
-            size_hint_y: None
-            height: dp(24)
+                    MDLabel:
+                        text: "Velocidad"
+                        size_hint_y: None
+                        height: dp(24)
 
-        Widget:
+                    MDSlider:
+                        id: slider_velocidad
+                        min: 0.5
+                        max: 1.5
+                        value: 0.9
+                        step: 0.05
 
-        MDRectangleFlatButton:
-            id: boton_generar_voz
-            text: "GENERAR VOZ"
-            pos_hint: {"center_x": 0.5}
-            on_release: root.al_presionar_generar_voz()
+                MDLabel:
+                    id: etiqueta_error
+                    theme_text_color: "Error"
+                    size_hint_y: None
+                    height: dp(24)
 
-        MDSpinner:
-            id: indicador_carga
-            size_hint: None, None
-            size: dp(36), dp(36)
-            pos_hint: {"center_x": 0.5}
-            active: False
+                MDRectangleFlatButton:
+                    id: boton_generar_voz
+                    text: "GENERAR VOZ"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_generar_voz()
+
+                MDSpinner:
+                    id: indicador_carga
+                    size_hint: None, None
+                    size: dp(36), dp(36)
+                    pos_hint: {"center_x": 0.5}
+                    active: False
 
 
 <PantallaVideo>:
     BoxLayout:
         orientation: "vertical"
-        padding: dp(16)
-        spacing: dp(10)
 
         BarraSuperior:
             title: "Estructura del video"
             accion_volver: root.al_presionar_atras
 
-        EtiquetaSeccion:
-            text: "Estructura del video"
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                padding: dp(16)
+                spacing: dp(10)
+                size_hint_y: None
+                height: max(self.minimum_height, root.height - dp(56))
 
-        MDLabel:
-            id: etiqueta_intro
-            size_hint_y: None
-            height: dp(40)
+                EtiquetaSeccion:
+                    text: "Estructura del video"
 
-        MDLabel:
-            id: etiqueta_desarrollo
-            size_hint_y: None
-            height: dp(60)
+                MDLabel:
+                    id: etiqueta_intro
+                    size_hint_y: None
+                    height: dp(40)
+                    text_size: self.width, None
 
-        MDLabel:
-            id: etiqueta_ejemplos
-            size_hint_y: None
-            height: dp(40)
+                MDLabel:
+                    id: etiqueta_desarrollo
+                    size_hint_y: None
+                    height: dp(60)
+                    text_size: self.width, None
 
-        MDLabel:
-            id: etiqueta_actividad
-            size_hint_y: None
-            height: dp(60)
+                MDLabel:
+                    id: etiqueta_ejemplos
+                    size_hint_y: None
+                    height: dp(40)
+                    text_size: self.width, None
 
-        MDLabel:
-            id: etiqueta_cierre
-            size_hint_y: None
-            height: dp(60)
+                MDLabel:
+                    id: etiqueta_actividad
+                    size_hint_y: None
+                    height: dp(60)
+                    text_size: self.width, None
 
-        Widget:
+                MDLabel:
+                    id: etiqueta_cierre
+                    size_hint_y: None
+                    height: dp(60)
+                    text_size: self.width, None
 
-        MDRectangleFlatButton:
-            text: "CONTINUAR"
-            pos_hint: {"center_x": 0.5}
-            on_release: root.al_presionar_continuar()
+                MDRectangleFlatButton:
+                    text: "CONTINUAR"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_continuar()
 
 
 <PantallaAlumno>:

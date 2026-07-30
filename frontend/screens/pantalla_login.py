@@ -48,6 +48,7 @@ class PantallaLogin(Screen):
         app.estado.docente_materia_principal = docente.get("materia_principal")
         app.estado.docente_creado_en = docente.get("creado_en")
         app.estado.modo_actual = "docente"
+        app.estado.guardar_sesion()
         self._bloquear(False)
         self.ids.campo_password.text = ""
         app.root.current = "inicio"

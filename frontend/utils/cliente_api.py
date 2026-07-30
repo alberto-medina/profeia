@@ -41,6 +41,14 @@ def _cargar_url_base_api() -> str:
 URL_BASE_API = _cargar_url_base_api()
 
 TIMEOUT_SEGUNDOS = 30
+# Llamadas que disparan generacion con IA (contenido, voz, imagenes) pueden
+# tardar bastante mas que una consulta comun: encadenan varios proveedores
+# de fallback y, en el caso de Hugging Face, a veces esperan a que el
+# modelo "despierte" antes de generar. Un timeout corto (30s) cortaba la
+# conexion del lado del celular mientras el backend seguia trabajando (y
+# el docente terminaba viendo un error aunque el recurso se generara bien
+# igual, solo que tarde para enterarse).
+TIMEOUT_GENERACION_SEGUNDOS = 120
 
 
 def mensaje_error(error) -> str:
@@ -77,7 +85,7 @@ def crear_clase(docente_id: str, datos_prompt: dict, callback_exito, callback_er
             f"{URL_BASE_API}/clases",
             params={"docente_id": docente_id},
             json=datos_prompt,
-            timeout=TIMEOUT_SEGUNDOS,
+            timeout=TIMEOUT_GENERACION_SEGUNDOS,
         )
         respuesta.raise_for_status()
         return respuesta.json()
@@ -229,7 +237,7 @@ def generar_voz(clase_id: str, parametros_voz: dict, callback_exito, callback_er
         respuesta = requests.post(
             f"{URL_BASE_API}/clases/{clase_id}/voz",
             json=parametros_voz,
-            timeout=TIMEOUT_SEGUNDOS,
+            timeout=TIMEOUT_GENERACION_SEGUNDOS,
         )
         respuesta.raise_for_status()
         return respuesta.json()
@@ -244,7 +252,7 @@ def generar_imagenes(clase_id: str, parametros_imagenes: dict, callback_exito, c
         respuesta = requests.post(
             f"{URL_BASE_API}/clases/{clase_id}/imagenes",
             json=parametros_imagenes,
-            timeout=TIMEOUT_SEGUNDOS,
+            timeout=TIMEOUT_GENERACION_SEGUNDOS,
         )
         respuesta.raise_for_status()
         return respuesta.json()
@@ -259,7 +267,7 @@ def generar_opciones_imagenes(clase_id: str, parametros_imagenes: dict, callback
         respuesta = requests.post(
             f"{URL_BASE_API}/clases/{clase_id}/imagenes/opciones",
             json=parametros_imagenes,
-            timeout=TIMEOUT_SEGUNDOS,
+            timeout=TIMEOUT_GENERACION_SEGUNDOS,
         )
         respuesta.raise_for_status()
         return respuesta.json()
@@ -274,7 +282,7 @@ def buscar_imagenes_web(clase_id: str, cantidad: int, callback_exito, callback_e
         respuesta = requests.post(
             f"{URL_BASE_API}/clases/{clase_id}/imagenes/buscar-web",
             params={"cantidad": cantidad},
-            timeout=TIMEOUT_SEGUNDOS,
+            timeout=TIMEOUT_GENERACION_SEGUNDOS,
         )
         respuesta.raise_for_status()
         return respuesta.json()
@@ -345,7 +353,7 @@ def generar_apoyos_accesibilidad(
         respuesta = requests.post(
             f"{URL_BASE_API}/clases/{clase_id}/accesibilidad/apoyos",
             json=parametros_apoyo,
-            timeout=TIMEOUT_SEGUNDOS,
+            timeout=TIMEOUT_GENERACION_SEGUNDOS,
         )
         respuesta.raise_for_status()
         return respuesta.json()

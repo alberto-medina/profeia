@@ -2,6 +2,7 @@
 Servicio de generacion multimedia: voz (TTS), imagenes y slides.
 """
 
+import asyncio
 import base64
 import re
 import unicodedata
@@ -976,8 +977,6 @@ async def generar_opciones_imagenes(
     Si ningun proveedor externo responde, cae a la imagen local generica
     (igual que el resto del sistema) para no dejar al docente sin nada.
     """
-    import asyncio
-
     configuracion = obtener_configuracion()
     proveedores = _proveedores_opciones_imagenes(configuracion)
     prompt = _construir_prompt_imagen(
@@ -1197,9 +1196,8 @@ async def generar_imagenes(
         descripcion_visual, parametros.estilo, sugerencia_imagen
     )
     for proveedor in proveedores:
-        urls = []
         try:
-            for indice in range(parametros.cantidad):
+            async def _generar_una_imagen(indice: int) -> str:
                 contenido = await _generar_con_proveedor(proveedor, prompt, indice, prompt_simple)
                 resultado_storage = await guardar_recurso_docente(
                     cliente=cliente,
@@ -1208,7 +1206,17 @@ async def generar_imagenes(
                     contenido=contenido,
                     content_type="image/png",
                 )
-                urls.append(resultado_storage["url"])
+                return resultado_storage["url"]
+
+            # Se generan todas las imagenes del proveedor EN PARALELO (antes
+            # era secuencial): con 3 imagenes y un proveedor lento como HF
+            # (503 "modelo frio" + espera), la suma secuencial podia superar
+            # facilmente el timeout del cliente movil.
+            urls = list(
+                await asyncio.gather(
+                    *[_generar_una_imagen(indice) for indice in range(parametros.cantidad)]
+                )
+            )
             return urls
         except httpx.HTTPStatusError as error:
             detalle = error.response.text[:300]
