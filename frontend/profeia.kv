@@ -129,7 +129,7 @@
         orientation: "vertical"
         padding: dp(36)
         spacing: dp(18)
-        on_touch_down: root.al_tocar_pantalla(*args)
+        on_touch_down: root.al_tocar_pantalla(args[1])
         canvas.before:
             Color:
                 rgba: app.color_azul
@@ -165,7 +165,7 @@
             size_hint_y: 1
 
         MDLabel:
-            text: "Toca para continuar"
+            text: "Toca dos veces para continuar"
             font_style: "Caption"
             halign: "center"
             theme_text_color: "Custom"
