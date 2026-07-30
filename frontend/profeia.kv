@@ -18,6 +18,9 @@
     halign: "left"
     text_size: self.width, None
 
+<MDTextField>:
+    write_tab: False
+
 <CampoTextoLargo@MDTextField>:
     multiline: True
     size_hint_y: None
@@ -28,111 +31,368 @@
     md_bg_color: app.color_azul
     text_color: 1, 1, 1, 1
     line_color: app.color_azul
+    size_hint_x: 1
 
 <MDFlatButton>:
-    text_color: app.color_texto_secundario
+    text_color: app.color_azul
+    size_hint_x: 1
+
+<ItemNav@BoxLayout>:
+    nombre_pantalla: ""
+    icono: ""
+    etiqueta: ""
+    orientation: "vertical"
+    padding: 0, dp(4)
+
+    MDIconButton:
+        icon: root.icono
+        pos_hint: {"center_x": 0.5}
+        theme_text_color: "Custom"
+        text_color: app.color_azul if app.root and app.root.current == root.nombre_pantalla else app.color_texto_secundario
+        on_release: app.root.current = root.nombre_pantalla
+
+    MDLabel:
+        text: root.etiqueta
+        font_style: "Caption"
+        halign: "center"
+        size_hint_y: None
+        height: dp(16)
+        theme_text_color: "Custom"
+        text_color: app.color_azul if app.root and app.root.current == root.nombre_pantalla else app.color_texto_secundario
+
+<BarraNavegacion@BoxLayout>:
+    orientation: "horizontal"
+    size_hint_y: None
+    height: dp(64)
+    canvas.before:
+        Color:
+            rgba: app.color_superficie
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: app.color_borde
+        Line:
+            points: [self.x, self.top, self.x + self.width, self.top]
+            width: 1
+
+    ItemNav:
+        nombre_pantalla: "inicio"
+        icono: "home-variant"
+        etiqueta: "Inicio"
+
+    ItemNav:
+        nombre_pantalla: "historial"
+        icono: "history"
+        etiqueta: "Historial"
+
+    ItemNav:
+        nombre_pantalla: "configuracion"
+        icono: "cog-outline"
+        etiqueta: "Perfil"
+
+<BarraSuperior@MDTopAppBar>:
+    accion_volver: None
+    title: ""
+    elevation: 0
+    md_bg_color: app.color_azul
+    left_action_items: [["arrow-left", lambda x: root.accion_volver()]] if root.accion_volver else []
+
+<TarjetaSeccion@MDCard>:
+    orientation: "vertical"
+    padding: dp(16)
+    spacing: dp(10)
+    size_hint_y: None
+    height: self.minimum_height
+    radius: [dp(12)]
+    elevation: 1
+    md_bg_color: app.color_superficie
 
 
 <PantallaEntrada>:
-    BoxLayout:
-        orientation: "vertical"
-        padding: dp(18)
-        spacing: dp(12)
-
-        MDLabel:
-            text: "PI"
-            size_hint: None, None
-            size: dp(48), dp(48)
-            pos_hint: {"center_x": 0.5}
-            halign: "center"
-            valign: "middle"
-            text_size: self.size
-            theme_text_color: "Custom"
-            text_color: 1, 1, 1, 1
-            canvas.before:
-                Color:
-                    rgba: app.color_azul
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(8)]
-
-        MDLabel:
-            text: "ProfeIA"
-            bold: True
-            font_style: "H4"
-            halign: "center"
-            size_hint_y: None
-            height: dp(52)
-            theme_text_color: "Custom"
-            text_color: app.color_texto
-
-        MDLabel:
-            text: "Ingresa el codigo de tu clase"
-            halign: "center"
-            size_hint_y: None
-            height: dp(34)
-            theme_text_color: "Custom"
-            text_color: app.color_texto_secundario
-
-        MDTextField:
-            id: campo_codigo
-            hint_text: "Codigo alumno"
-            mode: "rectangle"
-            halign: "center"
-            font_size: "22sp"
-            size_hint_y: None
-            height: dp(60)
-
-        MDRectangleFlatButton:
-            text: "ENTRAR COMO ALUMNO"
-            size_hint_x: 1
-            height: dp(52)
-            on_release: root.al_presionar_entrar_alumno()
-
-        MDLabel:
-            id: etiqueta_error
-            theme_text_color: "Error"
-            halign: "center"
-            size_hint_y: None
-            height: dp(30)
-
-        EtiquetaSeccion:
-            text: "Docentes"
-            font_style: "Subtitle1"
-
-        MDTextField:
-            id: campo_nombre_docente
-            hint_text: "Nombre docente (solo para crear cuenta)"
-            mode: "rectangle"
-
-        MDTextField:
-            id: campo_email_docente
-            hint_text: "Email docente"
-            mode: "rectangle"
-
-        MDTextField:
-            id: campo_password_docente
-            hint_text: "Clave"
-            mode: "rectangle"
-            password: True
-
+    ScrollView:
         BoxLayout:
-            id: barra_codigo
-            orientation: "horizontal"
-            spacing: dp(8)
+            orientation: "vertical"
+            padding: dp(24), dp(36)
+            spacing: dp(14)
             size_hint_y: None
-            height: dp(48)
+            height: max(self.minimum_height, root.height)
+
+            Widget:
+                size_hint_y: None
+                height: dp(12)
+
+            MDLabel:
+                text: "PI"
+                size_hint: None, None
+                size: dp(56), dp(56)
+                pos_hint: {"center_x": 0.5}
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+                canvas.before:
+                    Color:
+                        rgba: app.color_azul
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(14)]
+
+            MDLabel:
+                text: "ProfeIA"
+                bold: True
+                font_style: "H4"
+                halign: "center"
+                text_size: self.width, None
+                size_hint_y: None
+                height: dp(52)
+                theme_text_color: "Custom"
+                text_color: app.color_texto
+
+            MDLabel:
+                text: "El copiloto de IA para docentes"
+                halign: "center"
+                text_size: self.width, None
+                size_hint_y: None
+                height: dp(24)
+                theme_text_color: "Custom"
+                text_color: app.color_texto_secundario
+
+            Widget:
+                size_hint_y: None
+                height: dp(8)
+
+            TarjetaSeccion:
+                padding: dp(18)
+                spacing: dp(12)
+
+                MDLabel:
+                    text: "Soy alumno"
+                    bold: True
+                    size_hint_y: None
+                    height: dp(24)
+                    theme_text_color: "Custom"
+                    text_color: app.color_texto
+
+                MDLabel:
+                    text: "Ingresa el codigo que te dio tu docente"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: dp(22)
+                    theme_text_color: "Custom"
+                    text_color: app.color_texto_secundario
+
+                MDTextField:
+                    id: campo_codigo
+                    hint_text: "Codigo de clase"
+                    mode: "rectangle"
+                    halign: "center"
+                    font_size: "22sp"
+                    size_hint_y: None
+                    height: dp(60)
+
+                MDRectangleFlatButton:
+                    text: "ENTRAR COMO ALUMNO"
+                    size_hint_x: 1
+                    height: dp(52)
+                    on_release: root.al_presionar_entrar_alumno()
+
+            MDLabel:
+                id: etiqueta_error
+                theme_text_color: "Error"
+                halign: "center"
+                text_size: self.width, None
+                size_hint_y: None
+                height: dp(26)
+
+            Widget:
+                size_hint_y: None
+                height: dp(4)
+
+            MDLabel:
+                text: "Soy docente"
+                halign: "center"
+                text_size: self.width, None
+                size_hint_y: None
+                height: dp(22)
+                theme_text_color: "Custom"
+                text_color: app.color_texto_secundario
 
             MDRectangleFlatButton:
-                id: boton_login_docente
-                text: "INGRESAR"
-                on_release: root.al_presionar_entrar_docente()
+                text: "INGRESAR O CREAR CUENTA DOCENTE"
+                size_hint_x: 1
+                height: dp(52)
+                on_release: root.al_presionar_soy_docente()
 
-            MDFlatButton:
-                id: boton_registro_docente
-                text: "CREAR CUENTA"
-                on_release: root.al_presionar_crear_cuenta_docente()
+            Widget:
+
+
+<PantallaLogin>:
+    BoxLayout:
+        orientation: "vertical"
+
+        BarraSuperior:
+            title: "Ingresar"
+            accion_volver: root.al_presionar_volver
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                padding: dp(24), dp(24)
+                spacing: dp(14)
+                size_hint_y: None
+                height: max(self.minimum_height, root.height - dp(56))
+
+                Widget:
+                    size_hint_y: 1
+
+                MDLabel:
+                    text: "Bienvenido de nuevo"
+                    bold: True
+                    font_style: "H5"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: dp(40)
+                    theme_text_color: "Custom"
+                    text_color: app.color_texto
+
+                MDLabel:
+                    text: "Ingresa con tu cuenta docente"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: dp(24)
+                    theme_text_color: "Custom"
+                    text_color: app.color_texto_secundario
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(8)
+
+                MDTextField:
+                    id: campo_email
+                    hint_text: "Email"
+                    mode: "rectangle"
+                    size_hint_x: 1
+
+                MDTextField:
+                    id: campo_password
+                    hint_text: "Clave"
+                    mode: "rectangle"
+                    password: True
+                    size_hint_x: 1
+
+                MDLabel:
+                    id: etiqueta_error
+                    theme_text_color: "Error"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: dp(26)
+
+                MDRectangleFlatButton:
+                    id: boton_ingresar
+                    text: "INGRESAR"
+                    size_hint_x: 1
+                    height: dp(52)
+                    on_release: root.al_presionar_ingresar()
+
+                MDFlatButton:
+                    text: "NO TENGO CUENTA, QUIERO CREARLA"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_ir_a_registro()
+
+                Widget:
+                    size_hint_y: 1
+
+
+<PantallaRegistro>:
+    BoxLayout:
+        orientation: "vertical"
+
+        BarraSuperior:
+            title: "Crear cuenta"
+            accion_volver: root.al_presionar_volver
+
+        ScrollView:
+            BoxLayout:
+                orientation: "vertical"
+                padding: dp(24), dp(24)
+                spacing: dp(14)
+                size_hint_y: None
+                height: max(self.minimum_height, root.height - dp(56))
+
+                Widget:
+                    size_hint_y: 1
+
+                MDLabel:
+                    text: "Crea tu cuenta docente"
+                    bold: True
+                    font_style: "H5"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: dp(40)
+                    theme_text_color: "Custom"
+                    text_color: app.color_texto
+
+                MDLabel:
+                    text: "Empeza a generar clases en minutos"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: dp(24)
+                    theme_text_color: "Custom"
+                    text_color: app.color_texto_secundario
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(8)
+
+                MDTextField:
+                    id: campo_nombre
+                    hint_text: "Nombre"
+                    mode: "rectangle"
+                    size_hint_x: 1
+
+                MDTextField:
+                    id: campo_email
+                    hint_text: "Email"
+                    mode: "rectangle"
+                    size_hint_x: 1
+
+                MDTextField:
+                    id: campo_password
+                    hint_text: "Clave (minimo 6 caracteres)"
+                    mode: "rectangle"
+                    password: True
+                    size_hint_x: 1
+
+                MDLabel:
+                    id: etiqueta_error
+                    theme_text_color: "Error"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: dp(26)
+
+                MDRectangleFlatButton:
+                    id: boton_crear_cuenta
+                    text: "CREAR CUENTA"
+                    size_hint_x: 1
+                    height: dp(52)
+                    on_release: root.al_presionar_crear_cuenta()
+
+                MDFlatButton:
+                    text: "YA TENGO CUENTA, INGRESAR"
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.al_presionar_volver()
+
+                Widget:
+                    size_hint_y: 1
 
 
 <PantallaInicio>:
@@ -177,51 +437,52 @@
         ScrollView:
             BoxLayout:
                 orientation: "vertical"
-                spacing: dp(12)
+                spacing: dp(20)
                 size_hint_y: None
                 height: self.minimum_height
 
-                MDTextField:
-                    id: campo_prompt
-                    hint_text: "Ej: Crea una clase de 8 minutos sobre fracciones para ninos de 10 anos..."
-                    multiline: True
-                    size_hint_y: None
-                    height: dp(120)
-                    mode: "rectangle"
-                    on_text: root.al_cambiar_prompt(self.text)
+                TarjetaSeccion:
+                    padding: dp(16), dp(18)
+                    spacing: dp(14)
 
-                EtiquetaSeccion:
-                    text: "Plantillas rapidas"
-                    font_style: "Subtitle1"
+                    MDTextField:
+                        id: campo_prompt
+                        hint_text: "Describe tu clase"
+                        helper_text: "Ej: clase de 8 min sobre fracciones para chicos de 10 anos"
+                        helper_text_mode: "persistent"
+                        multiline: True
+                        size_hint_y: None
+                        height: dp(110)
+                        mode: "rectangle"
+                        on_text: root.al_cambiar_prompt(self.text)
 
-                BoxLayout:
-                    orientation: "horizontal"
-                    spacing: dp(6)
-                    size_hint_y: None
-                    height: dp(48)
+                    MDLabel:
+                        text: "Plantillas rapidas"
+                        bold: True
+                        size_hint_y: None
+                        height: dp(24)
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto_secundario
 
-                    MDRectangleFlatButton:
-                        text: "EXPLICAR"
-                        on_release: root.al_presionar_plantilla("explicacion")
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: dp(6)
+                        size_hint_y: None
+                        height: dp(48)
 
-                    MDFlatButton:
-                        text: "PRACTICAR"
-                        on_release: root.al_presionar_plantilla("practica")
+                        MDRectangleFlatButton:
+                            text: "EXPLICAR"
+                            on_release: root.al_presionar_plantilla("explicacion")
 
-                    MDFlatButton:
-                        text: "EVALUAR"
-                        on_release: root.al_presionar_plantilla("evaluacion")
+                        MDFlatButton:
+                            text: "PRACTICAR"
+                            on_release: root.al_presionar_plantilla("practica")
 
-                MDCard:
-                    orientation: "vertical"
-                    padding: dp(10)
-                    spacing: dp(6)
-                    size_hint_y: None
-                    height: dp(126)
-                    radius: [dp(8)]
-                    elevation: 1
-                    md_bg_color: app.color_superficie
+                        MDFlatButton:
+                            text: "EVALUAR"
+                            on_release: root.al_presionar_plantilla("evaluacion")
 
+                TarjetaSeccion:
                     MDLabel:
                         text: "Sugerencias"
                         bold: True
@@ -233,7 +494,7 @@
                     MDLabel:
                         id: etiqueta_sugerencias
                         size_hint_y: None
-                        height: dp(54)
+                        height: self.texture_size[1] + dp(8)
                         text_size: self.width, None
                         theme_text_color: "Custom"
                         text_color: app.color_texto_secundario
@@ -243,137 +504,68 @@
                         pos_hint: {"center_x": 0.5}
                         on_release: root.al_presionar_usar_sugerencias()
 
-                EtiquetaSeccion:
-                    text: "Duracion"
-                    font_style: "Subtitle1"
+                TarjetaSeccion:
+                    MDLabel:
+                        text: "Duracion"
+                        bold: True
+                        size_hint_y: None
+                        height: dp(24)
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto_secundario
 
-                MDBoxLayout:
-                    id: grupo_duracion
-                    orientation: "horizontal"
-                    size_hint_y: None
-                    height: dp(48)
-                    selected: chip_3min
+                    MDBoxLayout:
+                        id: grupo_duracion
+                        orientation: "horizontal"
+                        spacing: dp(6)
+                        size_hint_y: None
+                        height: dp(48)
+                        selected: chip_3min
 
-                    MDChip:
-                        id: chip_3min
-                        text: "3 min"
-                        on_release: grupo_duracion.selected = self
+                        MDChip:
+                            id: chip_3min
+                            text: "3 min"
+                            on_release: grupo_duracion.selected = self
+                            MDChipText:
+                                text: "3 min"
 
-                    MDChip:
-                        id: chip_5min
-                        text: "5 min"
-                        on_release: grupo_duracion.selected = self
+                        MDChip:
+                            id: chip_5min
+                            text: "5 min"
+                            on_release: grupo_duracion.selected = self
+                            MDChipText:
+                                text: "5 min"
 
-                    MDChip:
-                        id: chip_8min
-                        text: "8 min"
-                        on_release: grupo_duracion.selected = self
+                        MDChip:
+                            id: chip_8min
+                            text: "8 min"
+                            on_release: grupo_duracion.selected = self
+                            MDChipText:
+                                text: "8 min"
 
-                    MDChip:
-                        id: chip_15min
-                        text: "15 min"
-                        on_release: grupo_duracion.selected = self
-
-                BoxLayout:
-                    orientation: "horizontal"
-                    spacing: dp(8)
-                    size_hint_y: None
-                    height: dp(48)
-
-                    MDTextField:
-                        id: campo_edad
-                        hint_text: "Edad o grado (obligatorio)"
-                        text: ""
-                        on_text: root.al_cambiar_prompt(self.text)
-
-                    MDTextField:
-                        id: campo_materia
-                        hint_text: "Materia (obligatoria)"
-                        text: ""
-                        on_text: root.al_cambiar_prompt(self.text)
-
-                EtiquetaSeccion:
-                    text: "Apoyos para estudiantes"
-                    font_style: "Subtitle1"
-
-                MDLabel:
-                    text: "Opcional: marca apoyos si la clase necesita mas estructura, pausas o lectura simple."
-                    size_hint_y: None
-                    height: dp(42)
-                    text_size: self.width, None
-                    theme_text_color: "Secondary"
-
-                GridLayout:
-                    cols: 2
-                    spacing: dp(4)
-                    size_hint_y: None
-                    height: dp(132)
+                        MDChip:
+                            id: chip_15min
+                            text: "15 min"
+                            on_release: grupo_duracion.selected = self
+                            MDChipText:
+                                text: "15 min"
 
                     BoxLayout:
+                        orientation: "horizontal"
+                        spacing: dp(8)
                         size_hint_y: None
-                        height: dp(36)
-                        MDCheckbox:
-                            id: check_inicio_tdah
-                            active: False
-                            size_hint_x: None
-                            width: dp(48)
-                        MDLabel:
-                            text: "Atencion / TDAH"
+                        height: dp(48)
 
-                    BoxLayout:
-                        size_hint_y: None
-                        height: dp(36)
-                        MDCheckbox:
-                            id: check_inicio_tea
-                            active: False
-                            size_hint_x: None
-                            width: dp(48)
-                        MDLabel:
-                            text: "TEA / autismo"
+                        MDTextField:
+                            id: campo_edad
+                            hint_text: "Edad o grado *"
+                            text: ""
+                            on_text: root.al_cambiar_prompt(self.text)
 
-                    BoxLayout:
-                        size_hint_y: None
-                        height: dp(36)
-                        MDCheckbox:
-                            id: check_inicio_lectura
-                            active: False
-                            size_hint_x: None
-                            width: dp(48)
-                        MDLabel:
-                            text: "Lectura facil"
-
-                    BoxLayout:
-                        size_hint_y: None
-                        height: dp(36)
-                        MDCheckbox:
-                            id: check_inicio_ansiedad
-                            active: False
-                            size_hint_x: None
-                            width: dp(48)
-                        MDLabel:
-                            text: "Ansiedad / participacion gradual"
-
-                    BoxLayout:
-                        size_hint_y: None
-                        height: dp(36)
-                        MDCheckbox:
-                            id: check_inicio_rutina
-                            active: False
-                            size_hint_x: None
-                            width: dp(48)
-                        MDLabel:
-                            text: "Rutina visual"
-
-                    BoxLayout:
-                        size_hint_y: None
-                        height: dp(36)
-                        MDCheckbox:
-                            id: check_inicio_pausas
-                            active: False
-                            size_hint_x: None
-                            width: dp(48)
-                        MDLabel:
-                            text: "Pausas breves"
+                        MDTextField:
+                            id: campo_materia
+                            hint_text: "Materia *"
+                            text: ""
+                            on_text: root.al_cambiar_prompt(self.text)
 
                 MDLabel:
                     id: etiqueta_error
@@ -387,27 +579,14 @@
                     pos_hint: {"center_x": 0.5}
                     on_release: root.al_presionar_generar_clase()
 
-                MDFlatButton:
-                    text: "VER HISTORIAL"
-                    pos_hint: {"center_x": 0.5}
-                    on_release: app.root.current = "historial"
-
-                MDFlatButton:
-                    text: "MI PLAN"
-                    pos_hint: {"center_x": 0.5}
-                    on_release: app.root.current = "plan"
-
-                MDFlatButton:
-                    text: "CERRAR SESION"
-                    pos_hint: {"center_x": 0.5}
-                    on_release: root.al_presionar_cerrar_sesion()
-
                 MDSpinner:
                     id: indicador_carga
                     size_hint: None, None
                     size: dp(36), dp(36)
                     pos_hint: {"center_x": 0.5}
                     active: False
+
+        BarraNavegacion:
 
 
 <PantallaPlan>:
@@ -417,14 +596,7 @@
         spacing: dp(12)
 
         EtiquetaSeccion:
-            text: "Mi plan"
-
-        MDLabel:
-            id: etiqueta_docente
-            size_hint_y: None
-            height: dp(30)
-            halign: "center"
-            theme_text_color: "Secondary"
+            text: "Configuracion"
 
         MDLabel:
             id: etiqueta_estado
@@ -448,6 +620,46 @@
                 spacing: dp(14)
                 size_hint_y: None
                 height: self.minimum_height
+
+                TarjetaSeccion:
+                    padding: dp(16), dp(16)
+                    spacing: dp(8)
+
+                    MDLabel:
+                        text: "Perfil docente"
+                        bold: True
+                        size_hint_y: None
+                        height: dp(24)
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto
+
+                    MDLabel:
+                        id: etiqueta_perfil_nombre
+                        size_hint_y: None
+                        height: dp(22)
+                        text_size: self.width, None
+                        theme_text_color: "Secondary"
+
+                    MDLabel:
+                        id: etiqueta_perfil_email
+                        size_hint_y: None
+                        height: dp(22)
+                        text_size: self.width, None
+                        theme_text_color: "Secondary"
+
+                    MDLabel:
+                        id: etiqueta_perfil_materia
+                        size_hint_y: None
+                        height: dp(22)
+                        text_size: self.width, None
+                        theme_text_color: "Secondary"
+
+                    MDLabel:
+                        id: etiqueta_perfil_miembro_desde
+                        size_hint_y: None
+                        height: dp(22)
+                        text_size: self.width, None
+                        theme_text_color: "Secondary"
 
                 EtiquetaSeccion:
                     text: "Uso mensual"
@@ -525,6 +737,8 @@
             pos_hint: {"center_x": 0.5}
             on_release: root.al_presionar_volver()
 
+        BarraNavegacion:
+
 
 <PantallaHistorial>:
     BoxLayout:
@@ -556,6 +770,7 @@
             size_hint_y: None
             height: dp(34)
             halign: "center"
+            text_size: self.width, None
             theme_text_color: "Secondary"
 
         MDSpinner:
@@ -578,80 +793,113 @@
             pos_hint: {"center_x": 0.5}
             on_release: root.al_presionar_volver()
 
+        BarraNavegacion:
+
 
 <PantallaContenido>:
     BoxLayout:
         orientation: "vertical"
-        padding: dp(16)
-        spacing: dp(10)
 
-        EtiquetaSeccion:
-            text: "Tu clase generada"
+        BarraSuperior:
+            title: "Tu clase generada"
+            accion_volver: root.al_presionar_atras
 
-        ScrollView:
-            BoxLayout:
-                orientation: "vertical"
-                spacing: dp(10)
-                size_hint_y: None
-                height: self.minimum_height
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(16)
+            spacing: dp(10)
 
-                MDTextField:
-                    id: campo_titulo
-                    hint_text: "Titulo"
-
-                CampoTextoLargo:
-                    id: campo_objetivo
-                    hint_text: "Objetivo"
-
-                CampoTextoLargo:
-                    id: campo_introduccion
-                    hint_text: "Introduccion"
-
-                CampoTextoLargo:
-                    id: campo_explicacion
-                    hint_text: "Explicacion"
-
-                CampoTextoLargo:
-                    id: campo_ejemplos
-                    hint_text: "Ejemplos (uno por linea)"
-
-                CampoTextoLargo:
-                    id: campo_actividad
-                    hint_text: "Actividad"
-
-                CampoTextoLargo:
-                    id: campo_preguntas
-                    hint_text: "Preguntas (una por linea)"
-
-                CampoTextoLargo:
-                    id: campo_cuestionario
-                    hint_text: "Cuestionario (una consigna por linea)"
-
-                CampoTextoLargo:
-                    id: campo_tarea_hogar
-                    hint_text: "Tarea para el hogar"
-
-                CampoTextoLargo:
-                    id: campo_resumen
-                    hint_text: "Resumen / cierre"
-
+            ScrollView:
                 BoxLayout:
-                    orientation: "horizontal"
-                    spacing: dp(10)
+                    orientation: "vertical"
+                    spacing: dp(20)
                     size_hint_y: None
-                    height: dp(48)
+                    height: self.minimum_height
 
-                    MDFlatButton:
-                        id: boton_cancelar
-                        text: "CANCELAR"
-                        opacity: 0
-                        disabled: True
-                        on_release: root.al_presionar_cancelar()
+                    TarjetaSeccion:
+                        MDLabel:
+                            text: "Titulo y objetivo"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(24)
+                            theme_text_color: "Custom"
+                            text_color: app.color_texto_secundario
 
-                    MDRectangleFlatButton:
-                        id: boton_continuar
-                        text: "CONTINUAR"
-                        on_release: root.al_presionar_continuar()
+                        MDTextField:
+                            id: campo_titulo
+                            hint_text: "Titulo"
+
+                        CampoTextoLargo:
+                            id: campo_objetivo
+                            hint_text: "Objetivo"
+
+                    TarjetaSeccion:
+                        MDLabel:
+                            text: "Desarrollo"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(24)
+                            theme_text_color: "Custom"
+                            text_color: app.color_texto_secundario
+
+                        CampoTextoLargo:
+                            id: campo_introduccion
+                            hint_text: "Introduccion"
+
+                        CampoTextoLargo:
+                            id: campo_explicacion
+                            hint_text: "Explicacion"
+
+                        CampoTextoLargo:
+                            id: campo_ejemplos
+                            hint_text: "Ejemplos (uno por linea)"
+
+                        CampoTextoLargo:
+                            id: campo_actividad
+                            hint_text: "Actividad"
+
+                    TarjetaSeccion:
+                        MDLabel:
+                            text: "Cierre"
+                            bold: True
+                            size_hint_y: None
+                            height: dp(24)
+                            theme_text_color: "Custom"
+                            text_color: app.color_texto_secundario
+
+                        CampoTextoLargo:
+                            id: campo_preguntas
+                            hint_text: "Preguntas (una por linea)"
+
+                        CampoTextoLargo:
+                            id: campo_cuestionario
+                            hint_text: "Cuestionario (una consigna por linea)"
+
+                        CampoTextoLargo:
+                            id: campo_tarea_hogar
+                            hint_text: "Tarea para el hogar"
+
+                        CampoTextoLargo:
+                            id: campo_resumen
+                            hint_text: "Resumen / cierre"
+
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: dp(10)
+                        size_hint_y: None
+                        height: dp(48)
+
+                        MDFlatButton:
+                            id: boton_cancelar
+                            text: "CANCELAR"
+                            opacity: 0
+                            disabled: True
+                            on_release: root.al_presionar_cancelar()
+
+                        MDRectangleFlatButton:
+                            id: boton_continuar
+                            text: "CONTINUAR"
+                            on_release: root.al_presionar_continuar()
 
 
 <PantallaAdaptar>:
@@ -660,8 +908,9 @@
         padding: dp(16)
         spacing: dp(12)
 
-        EtiquetaSeccion:
-            text: "Adaptar la clase"
+        BarraSuperior:
+            title: "Adaptar la clase"
+            accion_volver: root.al_presionar_atras
 
         MDLabel:
             text: "Opcional: genera apoyos para estudiantes que necesitan mas estructura, pausas o consignas simples."
@@ -670,9 +919,7 @@
             text_size: self.width, None
             theme_text_color: "Secondary"
 
-        BoxLayout:
-            orientation: "vertical"
-            spacing: dp(8)
+        TarjetaSeccion:
 
             BoxLayout:
                 size_hint_y: None
@@ -745,6 +992,7 @@
             size_hint_y: None
             height: dp(34)
             halign: "center"
+            text_size: self.width, None
             theme_text_color: "Secondary"
 
         BoxLayout:
@@ -777,8 +1025,9 @@
         padding: dp(16)
         spacing: dp(10)
 
-        EtiquetaSeccion:
-            text: "Clase adaptada"
+        BarraSuperior:
+            title: "Clase adaptada"
+            accion_volver: root.al_presionar_volver
 
         ScrollView:
             BoxLayout:
@@ -832,19 +1081,11 @@
                     height: self.texture_size[1] + dp(12)
                     text_size: self.width, None
 
-        BoxLayout:
-            orientation: "horizontal"
-            spacing: dp(10)
+        MDRectangleFlatButton:
+            text: "CONTINUAR"
             size_hint_y: None
             height: dp(48)
-
-            MDFlatButton:
-                text: "VOLVER"
-                on_release: root.al_presionar_volver()
-
-            MDRectangleFlatButton:
-                text: "CONTINUAR"
-                on_release: root.al_presionar_continuar()
+            on_release: root.al_presionar_continuar()
 
 
 <PantallaRecursos>:
@@ -852,6 +1093,10 @@
         orientation: "vertical"
         padding: dp(16)
         spacing: dp(12)
+
+        BarraSuperior:
+            title: "Elegir recursos"
+            accion_volver: root.al_presionar_atras
 
         EtiquetaSeccion:
             text: "Que recursos queres usar?"
@@ -863,12 +1108,7 @@
                 size_hint_y: None
                 height: self.minimum_height
 
-                BoxLayout:
-                    orientation: "vertical"
-                    spacing: dp(8)
-                    size_hint_y: None
-                    height: self.minimum_height
-
+                TarjetaSeccion:
                     BoxLayout:
                         size_hint_y: None
                         height: dp(40)
@@ -912,6 +1152,10 @@
                             text: "BUSCAR IMAGENES GRATIS"
                             on_release: root.al_presionar_buscar_imagenes_web()
 
+                        MDFlatButton:
+                            text: "GENERAR OPCIONES CON IA"
+                            on_release: root.al_presionar_generar_opciones_imagenes()
+
                     BoxLayout:
                         size_hint_y: None
                         height: dp(40)
@@ -946,54 +1190,59 @@
                         MDLabel:
                             text: "PowerPoint"
 
-                EtiquetaSeccion:
-                    text: "Recursos propios"
-                    font_style: "Subtitle1"
+                TarjetaSeccion:
+                    MDLabel:
+                        text: "Recursos propios"
+                        bold: True
+                        size_hint_y: None
+                        height: dp(24)
+                        theme_text_color: "Custom"
+                        text_color: app.color_texto_secundario
 
-                MDLabel:
-                    text: "Adjunta imagenes o audios que quieras mostrar en la vista alumno y en el ZIP."
-                    size_hint_y: None
-                    height: dp(52)
-                    text_size: self.width, None
-                    theme_text_color: "Secondary"
+                    MDLabel:
+                        text: "Adjunta imagenes o audios que quieras mostrar en la vista alumno y en el ZIP."
+                        size_hint_y: None
+                        height: dp(52)
+                        text_size: self.width, None
+                        theme_text_color: "Secondary"
 
-                MDTextField:
-                    id: campo_imagen_docente
-                    hint_text: "Ruta de imagen del docente"
-                    mode: "rectangle"
+                    MDTextField:
+                        id: campo_imagen_docente
+                        hint_text: "Ruta de imagen del docente"
+                        mode: "rectangle"
 
-                BoxLayout:
-                    orientation: "horizontal"
-                    spacing: dp(8)
-                    size_hint_y: None
-                    height: dp(46)
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(46)
 
-                    MDFlatButton:
-                        text: "ELEGIR IMAGEN"
-                        on_release: root.al_presionar_buscar_imagen()
+                        MDFlatButton:
+                            text: "ELEGIR IMAGEN"
+                            on_release: root.al_presionar_buscar_imagen()
 
-                    MDRectangleFlatButton:
-                        text: "ADJUNTAR"
-                        on_release: root.al_presionar_adjuntar_imagen()
+                        MDRectangleFlatButton:
+                            text: "ADJUNTAR"
+                            on_release: root.al_presionar_adjuntar_imagen()
 
-                MDTextField:
-                    id: campo_audio_docente
-                    hint_text: "Ruta de audio del docente"
-                    mode: "rectangle"
+                    MDTextField:
+                        id: campo_audio_docente
+                        hint_text: "Ruta de audio del docente"
+                        mode: "rectangle"
 
-                BoxLayout:
-                    orientation: "horizontal"
-                    spacing: dp(8)
-                    size_hint_y: None
-                    height: dp(46)
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(46)
 
-                    MDFlatButton:
-                        text: "ELEGIR AUDIO"
-                        on_release: root.al_presionar_buscar_audio()
+                        MDFlatButton:
+                            text: "ELEGIR AUDIO"
+                            on_release: root.al_presionar_buscar_audio()
 
-                    MDRectangleFlatButton:
-                        text: "ADJUNTAR"
-                        on_release: root.al_presionar_adjuntar_audio()
+                        MDRectangleFlatButton:
+                            text: "ADJUNTAR"
+                            on_release: root.al_presionar_adjuntar_audio()
 
                 MDLabel:
                     id: etiqueta_estado
@@ -1022,57 +1271,70 @@
         padding: dp(16)
         spacing: dp(12)
 
+        BarraSuperior:
+            title: "Elegir voz"
+            accion_volver: root.al_presionar_atras
+
         EtiquetaSeccion:
             text: "Elegir voz"
 
-        MDBoxLayout:
-            id: grupo_voz
-            orientation: "vertical"
-            spacing: dp(8)
-            size_hint_y: None
-            height: dp(180)
-            selected: opcion_femenina
+        TarjetaSeccion:
+            MDBoxLayout:
+                id: grupo_voz
+                orientation: "vertical"
+                spacing: dp(8)
+                size_hint_y: None
+                height: dp(180)
+                selected: opcion_femenina
 
-            MDChip:
-                id: opcion_clonada
-                text: "Clonar mi voz"
-                valor_interno: "clonada"
-                on_release: grupo_voz.selected = self
+                MDChip:
+                    id: opcion_clonada
+                    text: "Clonar mi voz"
+                    valor_interno: "clonada"
+                    on_release: grupo_voz.selected = self
+                    MDChipText:
+                        text: "Clonar mi voz"
 
-            MDChip:
-                id: opcion_masculina
-                text: "Voz masculina"
-                valor_interno: "masculina"
-                on_release: grupo_voz.selected = self
+                MDChip:
+                    id: opcion_masculina
+                    text: "Voz masculina"
+                    valor_interno: "masculina"
+                    on_release: grupo_voz.selected = self
+                    MDChipText:
+                        text: "Voz masculina"
 
-            MDChip:
-                id: opcion_femenina
-                text: "Voz femenina"
-                valor_interno: "femenina"
-                on_release: grupo_voz.selected = self
+                MDChip:
+                    id: opcion_femenina
+                    text: "Voz femenina"
+                    valor_interno: "femenina"
+                    on_release: grupo_voz.selected = self
+                    MDChipText:
+                        text: "Voz femenina"
 
-            MDChip:
-                id: opcion_infantil
-                text: "Voz infantil"
-                valor_interno: "infantil"
-                on_release: grupo_voz.selected = self
+                MDChip:
+                    id: opcion_infantil
+                    text: "Voz infantil"
+                    valor_interno: "infantil"
+                    on_release: grupo_voz.selected = self
+                    MDChipText:
+                        text: "Voz infantil"
 
-        MDLabel:
-            text: "Idioma: Espanol"
-            size_hint_y: None
-            height: dp(30)
+            MDLabel:
+                text: "Idioma: Espanol"
+                size_hint_y: None
+                height: dp(30)
 
-        MDLabel:
-            text: "Velocidad"
-            size_hint_y: None
-            height: dp(24)
+            MDLabel:
+                text: "Velocidad"
+                size_hint_y: None
+                height: dp(24)
 
-        MDSlider:
-            id: slider_velocidad
-            min: 0.5
-            max: 1.5
-            value: 0.9
-            step: 0.05
+            MDSlider:
+                id: slider_velocidad
+                min: 0.5
+                max: 1.5
+                value: 0.9
+                step: 0.05
 
         MDLabel:
             id: etiqueta_error
@@ -1101,6 +1363,10 @@
         orientation: "vertical"
         padding: dp(16)
         spacing: dp(10)
+
+        BarraSuperior:
+            title: "Estructura del video"
+            accion_volver: root.al_presionar_atras
 
         EtiquetaSeccion:
             text: "Estructura del video"
@@ -1431,6 +1697,7 @@
                         size_hint_y: None
                         height: dp(24)
                         halign: "center"
+                        text_size: self.width, None
                         theme_text_color: "Secondary"
 
         MDFlatButton:
@@ -1444,6 +1711,10 @@
         orientation: "vertical"
         padding: dp(16)
         spacing: dp(12)
+
+        BarraSuperior:
+            title: "Exportar tu clase"
+            accion_volver: root.al_presionar_atras
 
         EtiquetaSeccion:
             text: "Exportar tu clase"
@@ -1466,6 +1737,7 @@
                     size_hint_y: None
                     height: dp(32)
                     halign: "center"
+                    text_size: self.width, None
                     theme_text_color: "Secondary"
 
                 BoxLayout:
@@ -1489,6 +1761,7 @@
                     size_hint_y: None
                     height: dp(28)
                     halign: "center"
+                    text_size: self.width, None
                     theme_text_color: "Secondary"
 
                 MDRectangleFlatButton:

@@ -19,6 +19,7 @@ from app.services.servicio_multimedia import (
     buscar_imagenes_wikimedia,
     generar_estructura_slides,
     generar_imagenes,
+    generar_opciones_imagenes,
     generar_voz,
 )
 from app.services.servicio_planes import registrar_consumo_docente, validar_cupo_docente
@@ -71,6 +72,17 @@ def _reemplazar_imagenes_gratis(cliente, clase_id: UUID) -> None:
     for recurso in _listar_recursos(cliente, clase_id, "imagen"):
         metadata = recurso.get("metadata_json") or {}
         if metadata.get("origen") not in {"wikimedia_commons", "local"}:
+            continue
+        recurso_id = recurso.get("id")
+        if recurso_id:
+            cliente.table("recursos_generados").delete().eq("id", recurso_id).execute()
+
+
+def _reemplazar_opciones_imagenes(cliente, clase_id: UUID) -> None:
+    """Quita opciones anteriores antes de guardar nuevas alternativas."""
+    for recurso in _listar_recursos(cliente, clase_id, "imagen"):
+        metadata = recurso.get("metadata_json") or {}
+        if metadata.get("origen") != "opcion_imagen":
             continue
         recurso_id = recurso.get("id")
         if recurso_id:
@@ -226,14 +238,71 @@ async def generar_imagenes_clase(clase_id: UUID, parametros: SolicitudGenerarIma
         ]
         if parte
     )
+    sugerencia_imagen = contenido.get("sugerencia_imagen")
 
-    urls = await generar_imagenes(cliente, clase_id, descripcion_visual, parametros)
+    urls = await generar_imagenes(
+        cliente, clase_id, descripcion_visual, parametros, sugerencia_imagen
+    )
     registrar_consumo_docente(cliente, clase["docente_id"], {"imagenes": len(urls)})
 
     return [
         _guardar_recurso(cliente, clase_id, "imagen", url, parametros.model_dump())
         for url in urls
     ]
+
+
+@router.post(
+    "/imagenes/opciones",
+    status_code=status.HTTP_200_OK,
+)
+async def generar_opciones_imagenes_clase(clase_id: UUID, parametros: SolicitudGenerarImagenes):
+    """
+    Genera UNA imagen con cada proveedor disponible EN PARALELO (OpenAI,
+    Hugging Face, Pollinations, etc.) para que el docente elija cual usar.
+
+    A diferencia de POST /imagenes, esta ruta NO guarda las opciones como
+    recursos definitivos de la clase todavia: solo las deja disponibles en
+    Storage para previsualizar. Una vez que el docente elige una, el
+    frontend debe llamar a POST /clases/{clase_id}/recursos con la url de
+    la opcion elegida (tipo="imagen") para persistirla como recurso final
+    de la clase.
+
+    Devuelve una lista de opciones:
+        [{"url": ..., "proveedor": ..., "metadata": {...}}, ...]
+    """
+    cliente = obtener_cliente_supabase()
+    clase = _obtener_clase_o_404(cliente, clase_id)
+    # Cada opcion cuenta como 1 imagen generada a fines de cupo, sin
+    # importar cuantos proveedores respondieron con exito.
+    validar_cupo_docente(cliente, clase["docente_id"], {"imagenes": 1})
+
+    contenido = clase.get("contenido_json") or {}
+    descripcion_visual = ". ".join(
+        parte
+        for parte in [
+            contenido.get("titulo", ""),
+            contenido.get("objetivo", ""),
+            contenido.get("resumen", ""),
+        ]
+        if parte
+    )
+    sugerencia_imagen = contenido.get("sugerencia_imagen")
+
+    _reemplazar_opciones_imagenes(cliente, clase_id)
+    opciones = await generar_opciones_imagenes(
+        cliente, clase_id, descripcion_visual, parametros, sugerencia_imagen
+    )
+    registrar_consumo_docente(cliente, clase["docente_id"], {"imagenes": 1})
+
+    recursos = []
+    for opcion in opciones:
+        metadata = {
+            "origen": "opcion_imagen",
+            "proveedor": opcion.get("proveedor"),
+            **(opcion.get("metadata") or {}),
+        }
+        recursos.append(_guardar_recurso(cliente, clase_id, "imagen", opcion["url"], metadata))
+    return recursos
 
 
 @router.post(

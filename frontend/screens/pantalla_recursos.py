@@ -18,9 +18,14 @@ class PantallaRecursos(Screen):
     """Checkboxes para elegir que recursos generar a partir del contenido."""
 
     def on_pre_enter(self, *args):
+        self._generando_imagenes_manual = False
         self.ids.etiqueta_estado.text = ""
         self.ids.indicador_carga.active = False
         self.ids.boton_continuar.disabled = False
+
+    def al_presionar_atras(self):
+        app = MDApp.get_running_app()
+        app.root.current = "apoyo"
 
     def al_presionar_buscar_imagen(self):
         self._abrir_selector_archivo(
@@ -79,6 +84,32 @@ class PantallaRecursos(Screen):
             callback_exito=self._al_buscar_imagenes_web_exito,
             callback_error=self._al_generar_recurso_error,
         )
+
+    def al_presionar_generar_opciones_imagenes(self):
+        app = MDApp.get_running_app()
+        if not app.estado.clase_id:
+            self.ids.etiqueta_estado.text = "Primero crea una clase."
+            return
+
+        self.ids.boton_continuar.disabled = True
+        self.ids.indicador_carga.active = True
+        self.ids.etiqueta_estado.text = "Generando opciones de imagen..."
+        cliente_api.generar_opciones_imagenes(
+            clase_id=app.estado.clase_id,
+            parametros_imagenes={"cantidad": 1, "estilo": "claro y educativo"},
+            callback_exito=self._al_generar_opciones_imagenes_exito,
+            callback_error=self._al_generar_recurso_error,
+        )
+
+    def _al_generar_opciones_imagenes_exito(self, recursos_generados):
+        app = MDApp.get_running_app()
+        app.estado.recursos_generados["imagenes"] = recursos_generados
+        self.ids.etiqueta_estado.text = (
+            f"Opciones generadas: {len(recursos_generados)}. "
+            "Por ahora se usara la primera; luego agregamos selector visual."
+        )
+        self.ids.boton_continuar.disabled = False
+        self.ids.indicador_carga.active = False
 
     def _al_buscar_imagenes_web_exito(self, recursos_generados):
         app = MDApp.get_running_app()
@@ -202,9 +233,16 @@ class PantallaRecursos(Screen):
     def _al_generar_imagenes_exito(self, recursos_generados):
         app = MDApp.get_running_app()
         app.estado.recursos_generados["imagenes"] = recursos_generados
+        if self._generando_imagenes_manual:
+            self._generando_imagenes_manual = False
+            self.ids.etiqueta_estado.text = f"Imagenes generadas: {len(recursos_generados)}"
+            self.ids.boton_continuar.disabled = False
+            self.ids.indicador_carga.active = False
+            return
         self._procesar_siguiente_tarea()
 
     def _al_generar_recurso_error(self, error):
+        self._generando_imagenes_manual = False
         self.ids.boton_continuar.disabled = False
         self.ids.indicador_carga.active = False
         self.ids.etiqueta_estado.text = (

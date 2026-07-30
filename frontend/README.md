@@ -19,29 +19,33 @@ Tambien se puede usar el script de desarrollo desde la raiz del proyecto:
 Ese script define `KIVY_HOME` dentro de la carpeta del proyecto para que los
 logs de Kivy no dependan de permisos en el perfil de Windows.
 
-Por defecto, `utils/cliente_api.py` apunta a `http://127.0.0.1:8000`, que es
+Por defecto, `utils/cliente_api.py` apunta a `http://127.0.0.1:8001`, que es
 donde corre el backend FastAPI en desarrollo local (ver `backend/README.md`).
+Tambien puede leer `api_config.json`, que es lo recomendado para compilar un
+APK que apunte a la IP LAN de la PC.
 
 ## Probar en un dispositivo Android fisico (durante desarrollo)
 
 Si vas a probar la app compilada en un celular fisico contra el backend que
-corre en tu PC ("Nicole"), reemplaza en `utils/cliente_api.py`:
+corre en tu PC, configura `frontend/api_config.json` con:
 
-```python
-URL_BASE_API = "http://127.0.0.1:8000"
+```json
+{
+  "api_url": "http://192.168.0.X:8001"
+}
 ```
 
-por la IP local de tu PC en la red WiFi, por ejemplo:
+Tambien podes usar el script desde la raiz del proyecto:
 
-```python
-URL_BASE_API = "http://192.168.0.X:8000"
+```powershell
+.\scripts\set_android_api_url.ps1 -ApiUrl "http://192.168.0.X:8001"
 ```
 
 y asegurate de correr el backend con `--host 0.0.0.0` para que acepte
 conexiones desde otros dispositivos de la red:
 
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```powershell
+.\scripts\run_backend_lan.ps1
 ```
 
 ## Compilar el APK (WSL2 Ubuntu + Buildozer)

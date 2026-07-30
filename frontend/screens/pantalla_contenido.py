@@ -80,6 +80,16 @@ class PantallaContenido(Screen):
             callback_error=self._al_guardar_error,
         )
 
+    def al_presionar_atras(self):
+        """Flecha de la barra superior: sale de esta pantalla sin guardar.
+        Si se entro a re-editar una clase ya exportada, vuelve ahi; si es
+        la primera vez (flujo de generacion), vuelve al inicio."""
+        app = MDApp.get_running_app()
+        if app.estado.pantalla_retorno_edicion == "exportar":
+            app.root.current = "exportar"
+        else:
+            app.root.current = "inicio"
+
     def al_presionar_cancelar(self):
         """Descarta los cambios no guardados y vuelve a la pantalla de origen
         sin tocar el contenido ya guardado en el backend. Solo visible cuando

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: profeia-api
+    env: docker
+    rootDir: backend
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: ENTORNO
+        value: desarrollo
+      - key: IA_CONTENIDO_FALLBACK_LOCAL
+        value: "true"

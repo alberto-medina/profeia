@@ -33,8 +33,13 @@ class PantallaPlan(Screen):
 
     def on_pre_enter(self, *args):
         app = MDApp.get_running_app()
-        self.ids.etiqueta_docente.text = (
-            f"{app.estado.docente_nombre or 'Docente'} - {app.estado.docente_email or ''}"
+        self.ids.etiqueta_perfil_nombre.text = f"Nombre: {app.estado.docente_nombre or '-'}"
+        self.ids.etiqueta_perfil_email.text = f"Email: {app.estado.docente_email or '-'}"
+        self.ids.etiqueta_perfil_materia.text = (
+            f"Materia principal: {app.estado.docente_materia_principal or 'No especificada'}"
+        )
+        self.ids.etiqueta_perfil_miembro_desde.text = (
+            f"Miembro desde: {self._formatear_fecha(app.estado.docente_creado_en)}"
         )
         self.ids.etiqueta_estado.text = "Cargando plan..."
         self.ids.etiqueta_uso.text = ""
@@ -47,6 +52,17 @@ class PantallaPlan(Screen):
             callback_exito=self._al_cargar_planes,
             callback_error=self._al_error,
         )
+
+    def _formatear_fecha(self, fecha_iso: str | None) -> str:
+        if not fecha_iso:
+            return "-"
+        try:
+            from datetime import datetime
+
+            fecha = datetime.fromisoformat(fecha_iso.replace("Z", "+00:00"))
+            return fecha.strftime("%d/%m/%Y")
+        except ValueError:
+            return fecha_iso
 
     def _al_cargar_planes(self, planes):
         self._planes = planes

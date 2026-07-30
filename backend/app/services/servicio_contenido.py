@@ -113,13 +113,55 @@ ALIAS_MATERIAS = {
 def construir_prompt_sistema() -> str:
     """Prompt de sistema usado para guiar a la IA generadora de contenido."""
     return (
-        "Sos un disenador instruccional experto. Tu tarea es generar el "
-        "contenido completo de una clase a partir de un pedido de un "
-        "docente. Devolves SOLO un JSON con las claves: titulo, objetivo, "
+        "Sos un disenador instruccional experto y tambien un excelente "
+        "narrador: sabes explicar temas complejos de forma memorable, con "
+        "datos curiosos, comparaciones sorprendentes y ejemplos vividos, "
+        "como lo haria el mejor docente que alguien recuerda de su "
+        "escolaridad. NUNCA generas contenido plano tipo definicion de "
+        "manual o resumen de enciclopedia. Cada clase que generas debe "
+        "sentirse como una leccion real, no como un resumen.\n\n"
+        "Devolves SOLO un JSON con las claves: titulo, objetivo, "
         "introduccion, explicacion, ejemplos (lista), actividad, preguntas "
-        "(lista), cuestionario (lista), tarea_hogar, resumen. El tono debe ser claro, paciente y adecuado a la "
-        "edad indicada. Los ejemplos deben ser cotidianos y locales "
-        "(Argentina) cuando sea posible."
+        "(lista), cuestionario (lista), tarea_hogar, resumen, "
+        "sugerencia_imagen.\n\n"
+        "Reglas de calidad por campo:\n"
+        "- explicacion: debe ser LARGA y RICA (minimo 5-7 oraciones). "
+        "Desarrolla el 'por que' y el 'como', no solo el 'que'. Incluye al "
+        "menos un dato curioso o sorprendente, una causa o consecuencia "
+        "concreta, y conecta el tema con algo que los estudiantes puedan "
+        "reconocer de su vida o entorno. Evita frases genericas como 'es "
+        "el contenido central de la clase'; anda directo al conocimiento "
+        "real del tema.\n"
+        "- ejemplos: cada ejemplo debe aportar informacion nueva y "
+        "especifica (nombres, numeros, lugares, situaciones concretas), "
+        "nunca repetir la definicion con otras palabras.\n"
+        "- preguntas: preguntas de REPASO y COMPRENSION para usar oralmente "
+        "durante la clase, sencillas, para verificar que se entendio la "
+        "explicacion.\n"
+        "- cuestionario: debe ser CLARAMENTE DISTINTO de 'preguntas'. Son "
+        "consignas de evaluacion mas exigentes: pedir que comparen, "
+        "justifiquen una eleccion, resuelvan un caso hipotetico, ordenen "
+        "causas y consecuencias, o apliquen el concepto a una situacion "
+        "nueva que no aparecio en la explicacion. Ninguna pregunta del "
+        "cuestionario puede ser una reformulacion de una de 'preguntas'.\n"
+        "- resumen: sintesis breve pero con contenido real (no meta-"
+        "descripcion de la clase), como si fuera lo que un estudiante "
+        "anotaria en su carpeta para estudiar despues.\n"
+        "- sugerencia_imagen: describi en 1-3 oraciones UNA escena concreta "
+        "y especifica para una ilustracion de apoyo de esta clase (no una "
+        "descripcion generica del tema). Si el tema involucra VARIOS "
+        "elementos, tipos o categorias distintas que se comparan o "
+        "clasifican entre si (ej. distintos tipos de relieve, distintos "
+        "grupos de animales, distintas etapas de un proceso), describi "
+        "explicitamente cada elemento por separado y aclara que deben "
+        "mostrarse en secciones o zonas CLARAMENTE SEPARADAS de la imagen "
+        "(nunca mezclados en una sola escena). Si el tema es un unico "
+        "concepto u objeto, describi una sola escena central y clara. "
+        "Nunca pidas texto, letras ni numeros escritos dentro de la "
+        "imagen.\n\n"
+        "El tono debe ser claro, entusiasta y adecuado a la edad indicada. "
+        "Los ejemplos deben ser cotidianos y locales (Argentina) cuando sea "
+        "posible."
     )
 
 
@@ -179,12 +221,130 @@ def _instruccion_json_pedagogico() -> str:
         "Devolve solamente JSON valido, sin markdown ni texto extra. "
         "Usa exactamente estas claves: titulo, objetivo, introduccion, "
         "explicacion, ejemplos, actividad, preguntas, cuestionario, "
-        "tarea_hogar, resumen. "
-        "La clase debe ser concreta, lista para aula argentina, con ejemplos "
-        "claros, una explicacion didactica, actividad aplicable, preguntas, "
-        "cuestionario breve y tarea. No repitas literalmente el pedido del "
-        "docente como contenido."
+        "tarea_hogar, resumen, sugerencia_imagen. "
+        "IMPORTANTE sobre el formato: 'ejemplos', 'preguntas' y "
+        "'cuestionario' deben ser listas de STRINGS simples (texto plano), "
+        "NUNCA listas de objetos/diccionarios con claves como 'pregunta' o "
+        "'respuesta'. Ejemplo de formato correcto para cuestionario: "
+        '["Que anio ocurrio el evento X?", "Explica con tus palabras Y"]. '
+        "Ejemplo de formato INCORRECTO (no lo uses): "
+        '[{"pregunta": "...", "respuesta": "..."}]. '
+        "\n\nIMPORTANTE sobre 'sugerencia_imagen': describi en 1-3 "
+        "oraciones una escena CONCRETA y ESPECIFICA de este tema puntual "
+        "para una ilustracion (nunca una descripcion vaga tipo 'una imagen "
+        "sobre el tema'). Si el tema compara o clasifica VARIOS elementos "
+        "distintos (ej. distintos tipos de relieve, distintos animales o "
+        "grupos, distintas etapas), nombra cada elemento explicitamente y "
+        "aclara que deben ir en secciones SEPARADAS de la imagen, nunca "
+        "mezclados. Si es un unico concepto, describi una escena central. "
+        "Nunca pidas texto/letras/numeros escritos en la imagen.\n\n"
+        "IMPORTANTE sobre la profundidad del contenido: no generes un "
+        "resumen breve ni una definicion de manual. La 'explicacion' debe "
+        "tener varias oraciones con informacion real y especifica del "
+        "tema (fechas, nombres, causas, consecuencias, datos curiosos "
+        "segun corresponda), como una clase de verdad dictada por un buen "
+        "docente. Por ejemplo, si el tema fuera 'el agua', una mala "
+        "explicacion diria solo 'el agua es un recurso natural importante'; "
+        "una buena explicacion contaria de donde viene el agua que "
+        "tomamos, por que el 97% del agua del planeta es salada, que pasa "
+        "si se contamina una fuente de agua dulce, y como esto se conecta "
+        "con la vida cotidiana del estudiante.\n\n"
+        "IMPORTANTE sobre 'preguntas' vs 'cuestionario': deben ser "
+        "completamente distintos entre si. 'preguntas' son de repaso oral "
+        "simple. 'cuestionario' son consignas de evaluacion mas complejas: "
+        "comparar, justificar, resolver un caso nuevo, ordenar causas y "
+        "consecuencias. No repitas la misma pregunta reformulada en ambas "
+        "listas.\n\n"
+        "La clase debe ser concreta, lista para aula argentina, con "
+        "ejemplos claros y especificos, una explicacion didactica extensa "
+        "y con contenido real del tema, actividad aplicable, preguntas de "
+        "repaso, cuestionario de evaluacion diferenciado y tarea. No "
+        "repitas literalmente el pedido del docente como contenido."
     )
+
+
+def _texto_desde_valor(valor) -> str:
+    """Convierte un valor arbitrario (string, dict, numero) a un string legible.
+
+    Algunos proveedores de IA (especialmente Groq/modelos open source) no
+    respetan siempre un json_schema estricto y devuelven objetos donde se
+    esperaba texto plano, por ejemplo:
+        {"pregunta": "...", "respuesta": "..."}
+    en vez de:
+        "..."
+    Esta funcion aplana esos casos para no perder la respuesta generada.
+    """
+    if isinstance(valor, str):
+        return valor.strip()
+    if isinstance(valor, dict):
+        pregunta = valor.get("pregunta") or valor.get("question")
+        respuesta = valor.get("respuesta") or valor.get("answer")
+        if pregunta and respuesta:
+            return f"{pregunta} (Respuesta: {respuesta})"
+        if pregunta:
+            return str(pregunta)
+        partes = [str(v) for v in valor.values() if v]
+        return " - ".join(partes)
+    if isinstance(valor, (list, tuple)):
+        return " ".join(_texto_desde_valor(item) for item in valor)
+    return str(valor) if valor is not None else ""
+
+
+def _normalizar_lista_strings(valor) -> list:
+    """Asegura que un campo que deberia ser list[str] realmente lo sea."""
+    if valor is None:
+        return []
+    if isinstance(valor, str):
+        return [valor.strip()] if valor.strip() else []
+    if isinstance(valor, list):
+        resultado = []
+        for item in valor:
+            texto = _texto_desde_valor(item)
+            if texto:
+                resultado.append(texto)
+        return resultado
+    texto = _texto_desde_valor(valor)
+    return [texto] if texto else []
+
+
+def _normalizar_datos_pedagogicos(datos: dict) -> dict:
+    """Corrige formatos inesperados antes de validar con Pydantic.
+
+    Los campos de texto simple (titulo, objetivo, etc.) se fuerzan a string,
+    y los campos de lista (ejemplos, preguntas, cuestionario) se fuerzan a
+    list[str], aplanando objetos si hiciera falta. Esto evita que una
+    respuesta valida en contenido, pero con forma inesperada, se descarte y
+    se pierda contra el generador local.
+    """
+    if not isinstance(datos, dict):
+        return datos
+
+    datos_normalizados = dict(datos)
+
+    campos_texto = [
+        "titulo",
+        "objetivo",
+        "introduccion",
+        "explicacion",
+        "actividad",
+        "tarea_hogar",
+        "resumen",
+        "sugerencia_imagen",
+    ]
+    for campo in campos_texto:
+        if campo in datos_normalizados:
+            datos_normalizados[campo] = _texto_desde_valor(
+                datos_normalizados[campo]
+            )
+
+    campos_lista = ["ejemplos", "preguntas", "cuestionario"]
+    for campo in campos_lista:
+        if campo in datos_normalizados:
+            datos_normalizados[campo] = _normalizar_lista_strings(
+                datos_normalizados[campo]
+            )
+
+    return datos_normalizados
 
 
 def _construir_prompt_usuario(solicitud: SolicitudCrearClase) -> str:
@@ -1331,7 +1491,7 @@ async def _generar_con_openai(
                 "strict": True,
             }
         },
-        "max_output_tokens": 1800,
+        "max_output_tokens": 3000,
     }
 
     headers = {
@@ -1349,6 +1509,7 @@ async def _generar_con_openai(
 
     texto = _extraer_texto_respuesta_openai(respuesta.json())
     datos = json.loads(_limpiar_json_modelo(texto))
+    datos = _normalizar_datos_pedagogicos(datos)
     return ContenidoPedagogico.model_validate(datos)
 
 
@@ -1384,8 +1545,8 @@ async def _generar_con_chat_compatible(
             },
             {"role": "user", "content": _construir_prompt_usuario(solicitud)},
         ],
-        "temperature": 0.35,
-        "max_tokens": 2200,
+        "temperature": 0.5,
+        "max_tokens": 3500,
         "response_format": {"type": "json_object"},
     }
     headers = {
@@ -1399,6 +1560,7 @@ async def _generar_con_chat_compatible(
 
     texto = _extraer_texto_respuesta_chat(respuesta.json())
     datos = json.loads(_limpiar_json_modelo(texto))
+    datos = _normalizar_datos_pedagogicos(datos)
     return ContenidoPedagogico.model_validate(datos)
 
 

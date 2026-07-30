@@ -38,9 +38,18 @@ class Configuracion(BaseSettings):
     ia_imagenes_api_key: str = ""
     ia_imagenes_modelo: str = "gpt-image-1"
     ia_imagenes_url: str = "https://api.openai.com/v1/images/generations"
+    # Apagado porque la cuenta de OpenAI tiene el limite de facturacion
+    # tocado (billing_hard_limit_reached). Mientras este asi, ni vale la
+    # pena intentarlo: solo agrega espera y ruido de error en los logs
+    # antes de caer a Hugging Face/Pollinations. Poner en True de nuevo
+    # (o via env IA_IMAGENES_OPENAI_HABILITADO=true) una vez resuelto el
+    # limite en platform.openai.com.
+    ia_imagenes_openai_habilitado: bool = False
     ia_imagenes_secundario_api_key: str = ""
     ia_imagenes_secundario_modelo: str = ""
     ia_imagenes_secundario_url: str = ""
+    ia_imagenes_huggingface_api_key: str = ""
+    ia_imagenes_huggingface_modelo: str = "stabilityai/stable-diffusion-3-medium-diffusers"
     ia_video_api_key: str = ""
 
     # Mercado Pago

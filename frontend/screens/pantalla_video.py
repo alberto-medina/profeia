@@ -26,6 +26,10 @@ class PantallaVideo(Screen):
         self.ids.etiqueta_actividad.text = f"Actividad: {contenido.get('actividad', '')[:80]}..."
         self.ids.etiqueta_cierre.text = f"Cierre: {contenido.get('resumen', '')[:80]}..."
 
+    def al_presionar_atras(self):
+        app = MDApp.get_running_app()
+        app.root.current = "recursos"
+
     def al_presionar_continuar(self):
         app = MDApp.get_running_app()
         app.root.current = "exportar"

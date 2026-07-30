@@ -85,23 +85,7 @@ class PantallaInicio(Screen):
     """Pantalla inicial donde el docente describe la clase que necesita."""
 
     def on_pre_enter(self, *args):
-        self._cargar_preferencias_apoyo()
         self._actualizar_sugerencias()
-
-    def _cargar_preferencias_apoyo(self):
-        app = MDApp.get_running_app()
-        preferencias = getattr(app.estado, "preferencias_apoyo", {}) or {}
-        ids_requeridos = {
-            "tdah": "check_inicio_tdah",
-            "tea": "check_inicio_tea",
-            "lectura_facil": "check_inicio_lectura",
-            "ansiedad": "check_inicio_ansiedad",
-            "rutina_visual": "check_inicio_rutina",
-            "pausas": "check_inicio_pausas",
-        }
-        for clave, widget_id in ids_requeridos.items():
-            if widget_id in self.ids:
-                self.ids[widget_id].active = preferencias.get(clave, False)
 
     def al_presionar_plantilla(self, tipo: str):
         prompt_actual = self.ids.campo_prompt.text.strip()
@@ -171,17 +155,6 @@ class PantallaInicio(Screen):
         self.ids.campo_prompt.text = f"{prompt_actual}{separador}{texto_limpio}".strip()
         self.ids.etiqueta_error.text = ""
 
-    def _guardar_preferencias_apoyo(self):
-        app = MDApp.get_running_app()
-        app.estado.preferencias_apoyo = {
-            "tdah": self.ids.check_inicio_tdah.active,
-            "tea": self.ids.check_inicio_tea.active,
-            "lectura_facil": self.ids.check_inicio_lectura.active,
-            "ansiedad": self.ids.check_inicio_ansiedad.active,
-            "rutina_visual": self.ids.check_inicio_rutina.active,
-            "pausas": self.ids.check_inicio_pausas.active,
-        }
-
     def al_presionar_generar_clase(self):
         """Callback del boton GENERAR CLASE."""
         app = MDApp.get_running_app()
@@ -208,8 +181,6 @@ class PantallaInicio(Screen):
         self.ids.indicador_carga.active = True
 
         duracion_minutos = int(self.ids.grupo_duracion.selected.text.replace(" min", ""))
-
-        self._guardar_preferencias_apoyo()
 
         datos_prompt = {
             "prompt_original": prompt_texto,
@@ -246,8 +217,3 @@ class PantallaInicio(Screen):
         self.ids.indicador_carga.active = False
         self.ids.etiqueta_error.text = cliente_api.mensaje_error(error)
         print(f"[PantallaInicio] error al generar clase: {error}")
-
-    def al_presionar_cerrar_sesion(self):
-        app = MDApp.get_running_app()
-        app.estado.cerrar_sesion()
-        app.root.current = "entrada"

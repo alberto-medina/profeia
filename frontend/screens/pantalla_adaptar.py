@@ -66,6 +66,10 @@ class PantallaAdaptar(Screen):
             callback_error=self._al_generar_error,
         )
 
+    def al_presionar_atras(self):
+        app = MDApp.get_running_app()
+        app.root.current = "contenido"
+
     def al_presionar_saltar(self):
         app = MDApp.get_running_app()
         app.root.current = "recursos"

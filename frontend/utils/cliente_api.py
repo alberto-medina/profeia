@@ -7,15 +7,38 @@ el hilo principal de Kivy, y las actualizaciones de UI resultantes se
 despachan con Clock.schedule_once.
 """
 
+import json
+import os
 import threading
 from pathlib import Path
 
 import requests
 from kivy.clock import Clock
 
-# URL base del backend. En desarrollo local con el emulador/dispositivo
-# Android, reemplazar 'localhost' por la IP de la maquina en la red local.
-URL_BASE_API = "http://127.0.0.1:8000"
+URL_BASE_API_PREDETERMINADA = "http://127.0.0.1:8001"
+
+
+def _cargar_url_base_api() -> str:
+    """Carga la URL del backend desde env o api_config.json."""
+    url_env = os.environ.get("PROFEIA_API_URL", "").strip()
+    if url_env:
+        return url_env.rstrip("/")
+
+    ruta_config = Path(__file__).resolve().parents[1] / "api_config.json"
+    if ruta_config.exists():
+        try:
+            datos_config = json.loads(ruta_config.read_text(encoding="utf-8-sig"))
+            url_config = str(datos_config.get("api_url", "")).strip()
+            if url_config:
+                return url_config.rstrip("/")
+        except (OSError, json.JSONDecodeError):
+            pass
+
+    return URL_BASE_API_PREDETERMINADA
+
+
+# URL base del backend. Para Android se configura con scripts/set_android_api_url.ps1.
+URL_BASE_API = _cargar_url_base_api()
 
 TIMEOUT_SEGUNDOS = 30
 
@@ -220,6 +243,21 @@ def generar_imagenes(clase_id: str, parametros_imagenes: dict, callback_exito, c
     def llamada():
         respuesta = requests.post(
             f"{URL_BASE_API}/clases/{clase_id}/imagenes",
+            json=parametros_imagenes,
+            timeout=TIMEOUT_SEGUNDOS,
+        )
+        respuesta.raise_for_status()
+        return respuesta.json()
+
+    _ejecutar_en_hilo(llamada, callback_exito, callback_error)
+
+
+def generar_opciones_imagenes(clase_id: str, parametros_imagenes: dict, callback_exito, callback_error):
+    """POST /clases/{id}/imagenes/opciones - genera alternativas de imagen."""
+
+    def llamada():
+        respuesta = requests.post(
+            f"{URL_BASE_API}/clases/{clase_id}/imagenes/opciones",
             json=parametros_imagenes,
             timeout=TIMEOUT_SEGUNDOS,
         )

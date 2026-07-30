@@ -15,6 +15,8 @@ class EstadoApp:
         self.docente_nombre: str | None = None
         self.docente_email: str | None = None
         self.docente_plan: str = "gratis"
+        self.docente_materia_principal: str | None = None
+        self.docente_creado_en: str | None = None
         self.clase_id: str | None = None
         self.codigo_publico: str | None = None
         self.modo_actual: str = "entrada"
@@ -87,6 +89,8 @@ class EstadoApp:
         self.docente_nombre = None
         self.docente_email = None
         self.docente_plan = "gratis"
+        self.docente_materia_principal = None
+        self.docente_creado_en = None
         self.modo_actual = "entrada"
         self.reiniciar_flujo_clase()
         self.modo_actual = "entrada"

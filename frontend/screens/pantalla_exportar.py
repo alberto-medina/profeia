@@ -18,6 +18,10 @@ from utils import cliente_api
 class PantallaExportar(Screen):
     """Genera y entrega los archivos finales de la clase."""
 
+    def al_presionar_atras(self):
+        app = MDApp.get_running_app()
+        app.root.current = "inicio"
+
     def _hay_recursos_para_paquete(self) -> bool:
         app = MDApp.get_running_app()
         recursos = app.estado.recursos_generados or {}

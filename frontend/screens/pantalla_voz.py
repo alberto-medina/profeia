@@ -12,6 +12,10 @@ from utils import cliente_api
 class PantallaVoz(Screen):
     """Configura los parametros de TTS y dispara la generacion del audio."""
 
+    def al_presionar_atras(self):
+        app = MDApp.get_running_app()
+        app.root.current = "recursos"
+
     def al_presionar_generar_voz(self):
         app = MDApp.get_running_app()
         estado = app.estado

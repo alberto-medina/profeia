@@ -15,6 +15,7 @@ from kivy.config import Config
 Config.set("graphics", "width", "420")
 Config.set("graphics", "height", "780")
 
+from kivy.core.text import LabelBase
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
 
@@ -24,6 +25,8 @@ from screens.pantalla_alumno import PantallaAlumno
 from screens.pantalla_apoyo import PantallaApoyo
 from screens.pantalla_contenido import PantallaContenido
 from screens.pantalla_entrada import PantallaEntrada
+from screens.pantalla_login import PantallaLogin
+from screens.pantalla_registro import PantallaRegistro
 from screens.pantalla_historial import PantallaHistorial
 from screens.pantalla_plan import PantallaPlan
 from screens.pantalla_recursos import PantallaRecursos
@@ -33,6 +36,24 @@ from screens.pantalla_exportar import PantallaExportar
 from utils.estado_app import EstadoApp
 
 RUTA_BASE = os.path.dirname(os.path.abspath(__file__))
+RUTA_FUENTES = os.path.join(RUTA_BASE, "assets", "fonts")
+
+# Reemplaza la familia "Roboto" (la que usan por defecto Kivy y KivyMD en
+# todos los widgets) por Poppins, para no tener que tocar font_name en
+# cada pantalla del .kv.
+LabelBase.register(
+    name="Roboto",
+    fn_regular=os.path.join(RUTA_FUENTES, "Poppins-Regular.ttf"),
+    fn_bold=os.path.join(RUTA_FUENTES, "Poppins-Bold.ttf"),
+)
+LabelBase.register(
+    name="RobotoLight",
+    fn_regular=os.path.join(RUTA_FUENTES, "Poppins-Regular.ttf"),
+)
+LabelBase.register(
+    name="RobotoMedium",
+    fn_regular=os.path.join(RUTA_FUENTES, "Poppins-Medium.ttf"),
+)
 
 
 class ProfeIAApp(MDApp):
@@ -58,8 +79,10 @@ class ProfeIAApp(MDApp):
 
         gestor_pantallas = ScreenManager()
         gestor_pantallas.add_widget(PantallaEntrada(name="entrada"))
+        gestor_pantallas.add_widget(PantallaLogin(name="login"))
+        gestor_pantallas.add_widget(PantallaRegistro(name="registro"))
         gestor_pantallas.add_widget(PantallaInicio(name="inicio"))
-        gestor_pantallas.add_widget(PantallaPlan(name="plan"))
+        gestor_pantallas.add_widget(PantallaPlan(name="configuracion"))
         gestor_pantallas.add_widget(PantallaHistorial(name="historial"))
         gestor_pantallas.add_widget(PantallaContenido(name="contenido"))
         gestor_pantallas.add_widget(PantallaAdaptar(name="adaptar"))

@@ -27,6 +27,7 @@ class ContenidoPedagogico(BaseModel):
     cuestionario: list[str] = Field(default_factory=list)
     tarea_hogar: Optional[str] = None
     resumen: str
+    sugerencia_imagen: Optional[str] = None
 
 
 class SolicitudCrearClase(BaseModel):
