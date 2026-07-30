@@ -217,16 +217,16 @@ class PantallaRecursos(Screen):
         )
 
     def _generar_imagenes(self):
-        """Imagenes del paso automatico de "continuar": usa busqueda
-        gratuita (Wikimedia) en vez de generacion con IA, para no gastar
-        cupo/tiempo de IA en un paso que el docente no eligio a proposito.
-        Generar con IA sigue disponible como accion manual (boton
-        "GENERAR OPCIONES CON IA" mas arriba en esta misma pantalla).
+        """Imagenes del paso automatico de "continuar": genera con IA
+        (Hugging Face / Pollinations, en paralelo), que es lo que le da
+        valor real a la clase en vez de una foto generica sin relacion
+        con el tema. Si falla, no bloquea el flujo (ver
+        _al_error_tarea_no_bloqueante).
         """
         app = MDApp.get_running_app()
-        cliente_api.buscar_imagenes_web(
+        cliente_api.generar_imagenes(
             clase_id=app.estado.clase_id,
-            cantidad=3,
+            parametros_imagenes={"cantidad": 3, "estilo": "claro y educativo"},
             callback_exito=self._al_generar_imagenes_exito,
             callback_error=self._al_error_tarea_no_bloqueante,
         )
