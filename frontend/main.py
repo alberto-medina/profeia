@@ -116,7 +116,30 @@ class ProfeIAApp(MDApp):
         gestor_pantallas.add_widget(PantallaVideo(name="video"))
         gestor_pantallas.add_widget(PantallaExportar(name="exportar"))
 
+        # Boton/gesto de volver de Android: sin esto, Kivy lo interpreta
+        # como "salir de la app" sin importar en que pantalla se este. Si
+        # la pantalla actual tiene su propia logica de volver (la misma
+        # que usa la flecha de la barra superior), se usa esa; si no
+        # (pantallas raiz como entrada, inicio o la dedicatoria), se deja
+        # el comportamiento por defecto de Android.
+        Window.bind(on_keyboard=self._al_volver_android)
+
         return gestor_pantallas
+
+    def _al_volver_android(self, window, key, *args):
+        if key != 27:
+            return False
+        return self._manejar_boton_volver()
+
+    def _manejar_boton_volver(self) -> bool:
+        pantalla = self.root.current_screen
+        if hasattr(pantalla, "al_presionar_atras"):
+            pantalla.al_presionar_atras()
+            return True
+        if hasattr(pantalla, "al_presionar_volver"):
+            pantalla.al_presionar_volver()
+            return True
+        return False
 
 
 if __name__ == "__main__":
