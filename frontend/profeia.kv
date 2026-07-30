@@ -124,6 +124,56 @@
     md_bg_color: app.color_superficie
 
 
+<PantallaDedicatoria>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(36)
+        spacing: dp(18)
+        on_touch_down: root.al_tocar_pantalla(*args)
+        canvas.before:
+            Color:
+                rgba: app.color_azul
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Widget:
+            size_hint_y: 1
+
+        MDLabel:
+            text: "“"
+            font_style: "H2"
+            bold: True
+            halign: "center"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 0.45
+            size_hint_y: None
+            height: dp(48)
+
+        MDLabel:
+            text: "La verdadera magia de ser docente ocurre cuando transformamos el aula en un coro de felicidad, donde terminamos enseñando con el corazón y cantando a la vida para dejar una huella imborrable en el alma de cada alumno."
+            font_style: "H6"
+            halign: "center"
+            valign: "middle"
+            text_size: self.width, None
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        Widget:
+            size_hint_y: 1
+
+        MDLabel:
+            text: "Toca para continuar"
+            font_style: "Caption"
+            halign: "center"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 0.55
+            size_hint_y: None
+            height: dp(24)
+
+
 <PantallaEntrada>:
     ScrollView:
         BoxLayout:
@@ -452,6 +502,15 @@
                 font_style: "H6"
                 theme_text_color: "Custom"
                 text_color: app.color_texto
+
+        MDLabel:
+            id: etiqueta_saludo
+            text: ""
+            size_hint_y: None
+            height: dp(22) if self.text else 0
+            opacity: 1 if self.text else 0
+            theme_text_color: "Custom"
+            text_color: app.color_texto_secundario
 
         BoxLayout:
             orientation: "horizontal"

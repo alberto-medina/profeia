@@ -33,6 +33,7 @@ from screens.pantalla_adaptar import PantallaAdaptar
 from screens.pantalla_alumno import PantallaAlumno
 from screens.pantalla_apoyo import PantallaApoyo
 from screens.pantalla_contenido import PantallaContenido
+from screens.pantalla_dedicatoria import PantallaDedicatoria
 from screens.pantalla_entrada import PantallaEntrada
 from screens.pantalla_login import PantallaLogin
 from screens.pantalla_registro import PantallaRegistro
@@ -85,9 +86,10 @@ class ProfeIAApp(MDApp):
         # Estado global accesible desde cualquier pantalla via
         # MDApp.get_running_app().estado
         self.estado = EstadoApp()
-        sesion_restaurada = self.estado.cargar_sesion()
+        self.estado.cargar_sesion()
 
         gestor_pantallas = ScreenManager()
+        gestor_pantallas.add_widget(PantallaDedicatoria(name="dedicatoria"))
         gestor_pantallas.add_widget(PantallaEntrada(name="entrada"))
         gestor_pantallas.add_widget(PantallaLogin(name="login"))
         gestor_pantallas.add_widget(PantallaRegistro(name="registro"))
@@ -102,9 +104,6 @@ class ProfeIAApp(MDApp):
         gestor_pantallas.add_widget(PantallaVoz(name="voz"))
         gestor_pantallas.add_widget(PantallaVideo(name="video"))
         gestor_pantallas.add_widget(PantallaExportar(name="exportar"))
-
-        if sesion_restaurada:
-            gestor_pantallas.current = "inicio"
 
         return gestor_pantallas
 

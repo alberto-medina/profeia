@@ -88,6 +88,15 @@ class PantallaInicio(Screen):
     def on_pre_enter(self, *args):
         self._actualizar_sugerencias()
         self._actualizar_valores_recientes()
+        self._actualizar_saludo()
+
+    def _actualizar_saludo(self):
+        if "etiqueta_saludo" not in self.ids:
+            return
+        app = MDApp.get_running_app()
+        nombre_completo = (app.estado.docente_nombre or "").strip()
+        primer_nombre = nombre_completo.split()[0] if nombre_completo else ""
+        self.ids.etiqueta_saludo.text = f"Hola, {primer_nombre}!" if primer_nombre else ""
 
     def al_presionar_escuchar_ayuda(self):
         """Lee en voz alta como usar esta pantalla (ayuda de accesibilidad,
