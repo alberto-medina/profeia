@@ -16,8 +16,17 @@ Config.set("graphics", "width", "420")
 Config.set("graphics", "height", "780")
 
 from kivy.core.text import LabelBase
+from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
+
+# En Android, sin esto la ventana no se reacomoda cuando aparece el
+# teclado: el teclado queda flotando encima y tapa el campo que el
+# usuario esta llenando (mas grave en pantallas largas con ScrollView,
+# donde el campo enfocado puede quedar bien abajo). "below_target" corre
+# la ventana para que el campo con foco quede siempre visible arriba del
+# teclado. En Windows/Linux no tiene efecto (no hay teclado en pantalla).
+Window.softinput_mode = "below_target"
 
 from screens.pantalla_inicio import PantallaInicio
 from screens.pantalla_adaptar import PantallaAdaptar

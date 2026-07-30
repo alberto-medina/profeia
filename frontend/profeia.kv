@@ -105,7 +105,7 @@
     size_hint_y: None
     height: self.minimum_height
     radius: [dp(12)]
-    elevation: 1
+    elevation: 0
     md_bg_color: app.color_superficie
 
 
@@ -1141,17 +1141,19 @@
                             text: "Imagenes IA / locales"
 
                     BoxLayout:
-                        orientation: "horizontal"
+                        orientation: "vertical"
                         spacing: dp(8)
                         size_hint_y: None
-                        height: dp(46)
+                        height: dp(100)
 
                         MDRectangleFlatButton:
                             text: "BUSCAR IMAGENES GRATIS"
+                            size_hint_x: 1
                             on_release: root.al_presionar_buscar_imagenes_web()
 
                         MDFlatButton:
                             text: "GENERAR OPCIONES CON IA"
+                            size_hint_x: 1
                             on_release: root.al_presionar_generar_opciones_imagenes()
 
                     BoxLayout:
@@ -1288,7 +1290,7 @@
                         orientation: "vertical"
                         spacing: dp(8)
                         size_hint_y: None
-                        height: dp(180)
+                        height: self.minimum_height
                         selected: opcion_femenina
 
                         MDChip:
@@ -1464,7 +1466,7 @@
                     size_hint_y: None
                     height: etiqueta_introduccion.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1484,7 +1486,7 @@
                     size_hint_y: None
                     height: etiqueta_explicacion.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1504,7 +1506,7 @@
                     size_hint_y: None
                     height: etiqueta_ejemplos.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1524,7 +1526,7 @@
                     size_hint_y: None
                     height: etiqueta_actividad.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1544,7 +1546,7 @@
                     size_hint_y: None
                     height: etiqueta_preguntas.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1564,7 +1566,7 @@
                     size_hint_y: None
                     height: etiqueta_resumen.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1584,7 +1586,7 @@
                     size_hint_y: None
                     height: etiqueta_cuestionario.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1604,7 +1606,7 @@
                     size_hint_y: None
                     height: etiqueta_tarea_hogar.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1644,7 +1646,7 @@
                     size_hint_y: None
                     height: etiqueta_apoyos.texture_size[1] + dp(28)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
@@ -1666,7 +1668,7 @@
                     size_hint_y: None
                     height: dp(126)
                     radius: [dp(8)]
-                    elevation: 1
+                    elevation: 0
                     md_bg_color: app.color_superficie
 
                     MDLabel:
