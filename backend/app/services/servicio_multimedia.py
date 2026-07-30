@@ -222,7 +222,17 @@ def _dibujar_tarjeta(
 
 
 def _tema_lamina_local(descripcion_visual: str) -> tuple[str, list[tuple[str, str, str]]]:
-    _ = descripcion_visual
+    texto = _sin_acentos(descripcion_visual).lower()
+    if "biotico" in texto and "abiotico" in texto:
+        return (
+            "Seres bioticos y factores abioticos",
+            [
+                ("Vivos", "Plantas, animales, hongos y microbios.", "#83bf7a"),
+                ("Sin vida", "Agua, luz, aire, suelo y temperatura.", "#79b7d8"),
+                ("Relacion", "Los seres vivos usan factores del ambiente.", "#f0b35a"),
+                ("Ejemplo", "Una planta necesita luz, agua y suelo.", "#d884b7"),
+            ],
+        )
     return (
         "Apoyo visual de emergencia",
         [

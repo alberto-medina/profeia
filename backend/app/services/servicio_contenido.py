@@ -523,6 +523,8 @@ def _es_pedido_generico(texto: str) -> bool:
 def _limpiar_destinatario_en_tema(texto: str) -> str:
     patrones = [
         r"\bpara\s+(nivel\s+)?primaria\b.*$",
+        r"\bpara\s+chicos?\s+de\s+primaria\b.*$",
+        r"\bpara\s+ni(?:n|ñ)os?\s+de\s+primaria\b.*$",
         r"\bpara\s+ni(?:n|ñ)os?\s+de\s+\d+\s+a(?:n|ñ)os?\b.*$",
         r"\bpara\s+chicos?\s+de\s+\d+\s+a(?:n|ñ)os?\b.*$",
         r"\bpara\s+\d+\s+a(?:n|ñ)os?\b.*$",
@@ -595,8 +597,10 @@ def _extraer_tema_desde_prompt(prompt_original: str, materia: str) -> str:
 
     texto = _normalizar_espacios(texto)
     texto = re.sub(r"\b(3|5|8|15)\s*(min|minutos)\b", "", texto, flags=re.IGNORECASE)
+    texto = _normalizar_espacios(texto)
+    texto = re.sub(r"^(sobre|de)\s+", "", texto, flags=re.IGNORECASE)
     texto = re.sub(r"\b(con\s+)?evaluacion\s+corta\b", "", texto, flags=re.IGNORECASE)
-    texto = re.sub(r"\b(practica\s+guiada|explicacion\s+rapida|clara\s+y\s+breve)\b", "", texto, flags=re.IGNORECASE)
+    texto = re.sub(r"\b(practica\s+guiada|explicacion\s+rapida|explicacion\s+concreta|clara\s+y\s+breve)\b", "", texto, flags=re.IGNORECASE)
     texto = re.sub(r"\bpara\s+(explicar|trabajar|ensenar|enseñar)(\s+con\s+ejemplos)?\b.*$", "", texto, flags=re.IGNORECASE)
     texto = re.sub(r"\b(para|con|sobre|de)\s*$", "", texto, flags=re.IGNORECASE)
     texto = _limpiar_destinatario_en_tema(texto)
@@ -1131,6 +1135,42 @@ def _detalles_tema(clave_materia: str, tema: str, perfil: dict) -> dict:
                 "Cada estacion dura dos minutos y se evalua precision, no fuerza."
             ),
             "producto": "una mejora observable en la precision del pase o tiro y una explicacion breve de la decision tomada",
+        }
+
+    if ("biotico" in texto or "bioticos" in texto) and (
+        "abiotico" in texto or "abioticos" in texto
+    ):
+        return {
+            "definicion": (
+                "Los seres bioticos son los componentes vivos de un ambiente: "
+                "plantas, animales, hongos, bacterias y otros organismos. Los "
+                "factores abioticos son los componentes sin vida, como agua, luz, "
+                "aire, suelo, temperatura y rocas. En un ecosistema los dos grupos "
+                "se necesitan: una planta usa luz, agua y suelo para crecer; un "
+                "animal necesita alimento, aire y un lugar donde refugiarse. Si "
+                "cambia un factor abiotico, por ejemplo falta agua o baja mucho la "
+                "temperatura, tambien cambia la vida de los seres bioticos."
+            ),
+            "pasos": [
+                "observar una foto o dibujo de un ambiente cercano",
+                "marcar con un color los elementos vivos",
+                "marcar con otro color los elementos sin vida",
+                "explicar una relacion entre un ser vivo y un factor sin vida",
+            ],
+            "ejemplo_modelado": (
+                "Ejemplo modelado: en una plaza, el pasto, un arbol, una hormiga "
+                "y un pajaro son bioticos. La luz del sol, el agua de lluvia, la "
+                "tierra y la temperatura son abioticos. El arbol necesita luz, agua "
+                "y suelo; el pajaro puede usar el arbol como refugio."
+            ),
+            "practica": (
+                "Actividad guiada: dibujar un ambiente simple con un arbol, un "
+                "animal, agua, suelo, aire y luz. Luego separar los elementos en "
+                "dos columnas: bioticos y abioticos. Para cerrar, escribir una "
+                "frase que explique como se relacionan, por ejemplo: 'la planta "
+                "necesita luz y agua para crecer'."
+            ),
+            "producto": "un cuadro de dos columnas con ejemplos bioticos, abioticos y una relacion explicada",
         }
 
     if "planta" in texto or "raiz" in texto or "tallo" in texto or "hoja" in texto or "flor" in texto:

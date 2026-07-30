@@ -10,6 +10,7 @@ from app.core.supabase_client import ClienteMemoriaDesarrollo
 
 
 RUTA_UPLOADS_LOCALES = Path(__file__).resolve().parents[2] / "generated" / "uploads"
+RUTA_GENERATED_LOCAL = Path(__file__).resolve().parents[2] / "generated"
 
 
 def _nombre_seguro(nombre: str) -> str:
@@ -42,8 +43,15 @@ async def guardar_recurso_docente(
         carpeta.mkdir(parents=True, exist_ok=True)
         ruta_local = carpeta / nombre_final
         ruta_local.write_bytes(contenido)
+        url_publica = str(ruta_local)
+        if configuracion.backend_public_url:
+            ruta_relativa = ruta_local.relative_to(RUTA_GENERATED_LOCAL).as_posix()
+            url_publica = (
+                f"{configuracion.backend_public_url.rstrip('/')}"
+                f"/generated/{ruta_relativa}"
+            )
         return {
-            "url": str(ruta_local),
+            "url": url_publica,
             "path": str(ruta_local),
             "bucket": "local",
             "modo": "local",

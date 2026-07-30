@@ -5,6 +5,7 @@ Vista alumno: resumen, imagenes, audios y apoyos simples.
 import os
 import tempfile
 import threading
+import webbrowser
 from functools import partial
 from pathlib import Path
 
@@ -13,7 +14,7 @@ from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.image import Image
+from kivy.uix.image import AsyncImage, Image
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivymd.app import MDApp
@@ -205,6 +206,8 @@ class PantallaAlumno(Screen):
         url_storage = str(recurso.get("url_storage") or "")
         if url_storage.startswith(("http://", "https://")):
             return url_storage
+        if url_storage.startswith("/generated/"):
+            return f"{cliente_api.URL_BASE_API}{url_storage}"
         return None
 
     def _agregar_mensaje(self, contenedor, texto: str):
@@ -303,8 +306,19 @@ class PantallaAlumno(Screen):
         ruta = self._ruta_local(recurso)
         url = self._url_remota(recurso)
 
-        fila = self._crear_tarjeta_base(102)
+        fila = self._crear_tarjeta_base(228)
         fila.add_widget(self._crear_etiqueta_recurso(f"Imagen: {nombre}"))
+        if ruta is not None or url is not None:
+            fuente = str(ruta) if ruta is not None else url
+            fila.add_widget(
+                AsyncImage(
+                    source=fuente,
+                    allow_stretch=True,
+                    keep_ratio=True,
+                    size_hint_y=None,
+                    height=dp(116),
+                )
+            )
 
         acciones = BoxLayout(orientation="horizontal", spacing=dp(8), size_hint_y=None, height=dp(46))
         acciones.add_widget(
@@ -363,10 +377,11 @@ class PantallaAlumno(Screen):
 
     def _abrir_recurso(self, ruta: Path | None, url: str | None, *args):
         if ruta is not None:
-            os.startfile(ruta)  # noqa: S606 - accion explicita del usuario en Windows
+            if hasattr(os, "startfile"):
+                os.startfile(ruta)  # noqa: S606 - accion explicita del usuario en Windows
             return
         if url:
-            os.startfile(url)  # noqa: S606 - accion explicita del usuario en Windows
+            webbrowser.open(url)
 
     def al_presionar_descargar_paquete(self):
         codigo = self.ids.campo_codigo.text.strip().upper()

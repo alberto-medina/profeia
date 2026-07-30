@@ -60,6 +60,7 @@ class Configuracion(BaseSettings):
     # General
     entorno: str = "desarrollo"
     puerto: int = 8000
+    backend_public_url: str = ""
 
 
 @lru_cache

@@ -10,3 +10,5 @@ services:
         value: desarrollo
       - key: IA_CONTENIDO_FALLBACK_LOCAL
         value: "true"
+      - key: BACKEND_PUBLIC_URL
+        value: https://profeia-api.onrender.com
