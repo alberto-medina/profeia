@@ -213,17 +213,35 @@ class PantallaRecursos(Screen):
         cliente_api.generar_slides(
             clase_id=app.estado.clase_id,
             callback_exito=self._al_generar_slides_exito,
-            callback_error=self._al_generar_recurso_error,
+            callback_error=self._al_error_tarea_no_bloqueante,
         )
 
     def _generar_imagenes(self):
+        """Imagenes del paso automatico de "continuar": usa busqueda
+        gratuita (Wikimedia) en vez de generacion con IA, para no gastar
+        cupo/tiempo de IA en un paso que el docente no eligio a proposito.
+        Generar con IA sigue disponible como accion manual (boton
+        "GENERAR OPCIONES CON IA" mas arriba en esta misma pantalla).
+        """
         app = MDApp.get_running_app()
-        cliente_api.generar_imagenes(
+        cliente_api.buscar_imagenes_web(
             clase_id=app.estado.clase_id,
-            parametros_imagenes={"cantidad": 3, "estilo": "claro y educativo"},
+            cantidad=3,
             callback_exito=self._al_generar_imagenes_exito,
-            callback_error=self._al_generar_recurso_error,
+            callback_error=self._al_error_tarea_no_bloqueante,
         )
+
+    def _al_error_tarea_no_bloqueante(self, error):
+        """Un paso automatico (slides/imagenes) fallo: en vez de dejar al
+        docente trabado en esta pantalla, se salta ese recurso puntual y
+        se sigue con el siguiente paso del flujo.
+        """
+        print(f"[PantallaRecursos] paso automatico fallo, se salta: {error}")
+        self.ids.etiqueta_estado.text = (
+            "No se pudo generar uno de los recursos automaticos; "
+            "podes agregarlo despues manualmente."
+        )
+        self._procesar_siguiente_tarea()
 
     def _al_generar_slides_exito(self, recurso_generado):
         app = MDApp.get_running_app()

@@ -4,19 +4,24 @@ contenido pedagogico.
 """
 
 import json
+from io import BytesIO
 from pathlib import Path
 from textwrap import wrap
+from urllib.parse import urlparse
 from uuid import UUID
 from zipfile import ZIP_DEFLATED, ZipFile
 
+import httpx
 from PIL import Image, ImageDraw, ImageFont
 from pptx import Presentation
 from pptx.enum.text import PP_ALIGN
 from pptx.util import Inches, Pt
 
+from app.services.servicio_storage import guardar_recurso_docente
 
-RUTA_EXPORTACIONES = Path(__file__).resolve().parents[2] / "generated" / "exportaciones"
+
 RUTA_FUENTES_WINDOWS = Path("C:/Windows/Fonts")
+EXTENSIONES_IMAGEN_VALIDAS = {".png", ".jpg", ".jpeg", ".webp"}
 
 
 def _limpiar_texto_pdf(texto: str) -> str:
@@ -100,15 +105,40 @@ def _metadata_recurso(recurso: dict) -> dict:
     return metadata if isinstance(metadata, dict) else {}
 
 
-def _ruta_imagen_recurso(recurso: dict) -> Path | None:
+async def _descargar_bytes(url_o_ruta: str, cliente_http: httpx.AsyncClient) -> bytes | None:
+    """
+    Obtiene el contenido de un recurso ya generado, sin importar si vive en
+    Supabase Storage (URL publica http/https) o en disco local (modo
+    desarrollo sin Supabase configurado).
+    """
+    if not url_o_ruta:
+        return None
+    if url_o_ruta.startswith("http://") or url_o_ruta.startswith("https://"):
+        try:
+            respuesta = await cliente_http.get(url_o_ruta)
+            respuesta.raise_for_status()
+        except httpx.HTTPError:
+            return None
+        return respuesta.content
+
+    ruta = Path(url_o_ruta)
+    if ruta.exists() and ruta.is_file():
+        return ruta.read_bytes()
+    return None
+
+
+def _extension_recurso(url_storage: str) -> str:
+    ruta = urlparse(url_storage).path if url_storage.startswith("http") else url_storage
+    return Path(ruta).suffix or ".bin"
+
+
+async def _bytes_imagen_recurso(recurso: dict, cliente_http: httpx.AsyncClient) -> bytes | None:
     if recurso.get("tipo") != "imagen":
         return None
-    ruta = Path(str(recurso.get("url_storage") or ""))
-    if not ruta.exists() or not ruta.is_file():
+    url_storage = str(recurso.get("url_storage") or "")
+    if _extension_recurso(url_storage).lower() not in EXTENSIONES_IMAGEN_VALIDAS:
         return None
-    if ruta.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp"}:
-        return None
-    return ruta
+    return await _descargar_bytes(url_storage, cliente_http)
 
 
 def _dibujar_texto_envuelto(
@@ -127,7 +157,7 @@ def _dibujar_texto_envuelto(
     return y
 
 
-def _crear_pagina_recurso_imagen(ruta: Path, indice: int, metadata: dict) -> Image.Image:
+def _crear_pagina_recurso_imagen(contenido_imagen: bytes, indice: int, metadata: dict) -> Image.Image:
     pagina = Image.new("RGB", (1240, 1754), "#f4f1ea")
     dibujo = ImageDraw.Draw(pagina)
     azul = "#1f3a52"
@@ -139,7 +169,7 @@ def _crear_pagina_recurso_imagen(ruta: Path, indice: int, metadata: dict) -> Ima
     dibujo.text((115, 115), f"Imagen de apoyo {indice}", fill=azul, font=_fuente_pdf(48, True))
     dibujo.text((115, 180), "Recurso visual agregado a la clase.", fill=gris, font=_fuente_pdf(25))
 
-    with Image.open(ruta) as imagen_original:
+    with Image.open(BytesIO(contenido_imagen)) as imagen_original:
         imagen = imagen_original.convert("RGB")
         imagen.thumbnail((1010, 1040))
         x_imagen = (1240 - imagen.width) // 2
@@ -154,7 +184,7 @@ def _crear_pagina_recurso_imagen(ruta: Path, indice: int, metadata: dict) -> Ima
         pagina.paste(imagen, (x_imagen, y_imagen))
 
     y_texto = min(1395, y_imagen + imagen.height + 55)
-    titulo = metadata.get("titulo") or ruta.stem
+    titulo = metadata.get("titulo") or f"Imagen {indice}"
     origen = metadata.get("origen") or metadata.get("fuente")
     licencia = metadata.get("licencia")
 
@@ -186,31 +216,32 @@ def _crear_pagina_recurso_imagen(ruta: Path, indice: int, metadata: dict) -> Ima
     return pagina
 
 
-def _crear_paginas_recursos_imagen(recursos: list[dict]) -> list[Image.Image]:
+async def _crear_paginas_recursos_imagen(
+    recursos: list[dict], cliente_http: httpx.AsyncClient
+) -> list[Image.Image]:
     paginas = []
     for indice, recurso in enumerate(recursos, start=1):
-        ruta = _ruta_imagen_recurso(recurso)
-        if not ruta:
+        contenido_imagen = await _bytes_imagen_recurso(recurso, cliente_http)
+        if not contenido_imagen:
             continue
-        paginas.append(_crear_pagina_recurso_imagen(ruta, indice, _metadata_recurso(recurso)))
+        paginas.append(
+            _crear_pagina_recurso_imagen(contenido_imagen, indice, _metadata_recurso(recurso))
+        )
     return paginas
 
 
-def _nombre_recurso_zip(recurso: dict, indice: int) -> str | None:
-    ruta_recurso = Path(str(recurso.get("url_storage") or ""))
-    if not ruta_recurso.exists() or not ruta_recurso.is_file():
-        return None
-    extension = ruta_recurso.suffix or ".bin"
+def _nombre_recurso_zip(recurso: dict, indice: int) -> str:
+    extension = _extension_recurso(str(recurso.get("url_storage") or ""))
     tipo = str(recurso.get("tipo") or "recurso")
     return f"recursos/{indice:02d}-{tipo}{extension}"
 
 
-def _crear_pdf_con_imagenes(
-    ruta_pdf: Path,
+async def _crear_pdf_con_imagenes(
     contenido_json: dict,
     lineas: list[str],
-    recursos: list[dict] | None = None,
-) -> None:
+    recursos: list[dict] | None,
+    cliente_http: httpx.AsyncClient,
+) -> bytes:
     paginas: list[Image.Image] = []
     ancho, alto = 1240, 1754
     margen_x, margen_y = 95, 95
@@ -268,10 +299,12 @@ def _crear_pdf_con_imagenes(
     paginas.append(pagina)
     if _requiere_lamina_tablas(contenido_json):
         paginas.append(_crear_pagina_lamina_tablas())
-    paginas.extend(_crear_paginas_recursos_imagen(recursos or []))
+    paginas.extend(await _crear_paginas_recursos_imagen(recursos or [], cliente_http))
 
     primera, *resto = paginas
-    primera.save(ruta_pdf, "PDF", resolution=150.0, save_all=True, append_images=resto)
+    buffer = BytesIO()
+    primera.save(buffer, "PDF", resolution=150.0, save_all=True, append_images=resto)
+    return buffer.getvalue()
 
 
 def _lineas_contenido(contenido_json: dict) -> list[str]:
@@ -338,7 +371,7 @@ def _lineas_contenido(contenido_json: dict) -> list[str]:
     return lineas
 
 
-def _crear_pdf_simple(ruta_pdf: Path, titulo: str, lineas: list[str]) -> None:
+def _crear_pdf_simple(titulo: str, lineas: list[str]) -> bytes:
     """Crea un PDF basico multipagina, suficiente para la demo local."""
     lineas_pdf = []
     for linea in lineas:
@@ -415,7 +448,7 @@ def _crear_pdf_simple(ruta_pdf: Path, titulo: str, lineas: list[str]) -> None:
         ).encode("ascii")
     )
 
-    ruta_pdf.write_bytes(contenido)
+    return bytes(contenido)
 
 
 def _agregar_slide_texto(
@@ -466,7 +499,7 @@ def _agregar_slide_texto(
             parrafo.level = 1
 
 
-def _crear_pptx_simple(ruta_pptx: Path, contenido_json: dict) -> None:
+def _crear_pptx_simple(destino, contenido_json: dict) -> None:
     """Crea una presentacion editable para la demo local del MVP."""
     presentacion = Presentation()
     presentacion.slide_width = Inches(10)
@@ -551,56 +584,81 @@ def _crear_pptx_simple(ruta_pptx: Path, contenido_json: dict) -> None:
             or ["Sin adaptaciones generadas."],
         )
 
-    presentacion.save(ruta_pptx)
+    presentacion.save(destino)
 
 
 async def exportar_pdf(
+    cliente,
     clase_id: UUID,
     contenido_json: dict,
     recursos: list[dict] | None = None,
 ) -> str:
     """
     Genera un PDF con el contenido de la clase (guion, ejemplos, actividad,
-    evaluacion) y devuelve la ruta local en modo desarrollo.
+    evaluacion), lo sube a Storage y devuelve su URL publica. Antes se
+    devolvia una ruta en el disco del propio backend, que solo servia para
+    abrir el archivo desde la misma maquina (rompia en el celular, que no
+    tiene forma de acceder al disco del servidor).
     """
-    RUTA_EXPORTACIONES.mkdir(parents=True, exist_ok=True)
-    ruta_pdf = RUTA_EXPORTACIONES / f"{clase_id}.pdf"
     titulo = contenido_json.get("titulo", "Clase generada")
     lineas = _lineas_contenido(contenido_json)
     try:
-        _crear_pdf_con_imagenes(ruta_pdf, contenido_json, lineas, recursos or [])
+        async with httpx.AsyncClient(timeout=30) as cliente_http:
+            contenido_pdf = await _crear_pdf_con_imagenes(
+                contenido_json, lineas, recursos or [], cliente_http
+            )
     except Exception as error:
         print(
             "[servicio_exportacion] No se pudo crear PDF visual; "
             f"usando PDF simple. Detalle: {error}"
         )
-        _crear_pdf_simple(ruta_pdf, titulo, lineas)
-    return str(ruta_pdf)
+        contenido_pdf = _crear_pdf_simple(titulo, lineas)
+
+    resultado_storage = await guardar_recurso_docente(
+        cliente=cliente,
+        clase_id=clase_id,
+        nombre_archivo=f"clase-{clase_id}.pdf",
+        contenido=contenido_pdf,
+        content_type="application/pdf",
+    )
+    return resultado_storage["url"]
 
 
-async def exportar_pptx(clase_id: UUID, contenido_json: dict) -> str:
+async def exportar_pptx(cliente, clase_id: UUID, contenido_json: dict) -> str:
     """
-    Genera una presentacion PPTX a partir de la estructura de slides de la
-    clase y devuelve la ruta local en modo desarrollo.
+    Genera una presentacion PPTX a partir del contenido de la clase, la
+    sube a Storage y devuelve su URL publica.
     """
-    RUTA_EXPORTACIONES.mkdir(parents=True, exist_ok=True)
-    ruta_pptx = RUTA_EXPORTACIONES / f"{clase_id}.pptx"
-    _crear_pptx_simple(ruta_pptx, contenido_json)
-    return str(ruta_pptx)
+    buffer = BytesIO()
+    _crear_pptx_simple(buffer, contenido_json)
+    resultado_storage = await guardar_recurso_docente(
+        cliente=cliente,
+        clase_id=clase_id,
+        nombre_archivo=f"clase-{clase_id}.pptx",
+        contenido=buffer.getvalue(),
+        content_type=(
+            "application/vnd.openxmlformats-officedocument"
+            ".presentationml.presentation"
+        ),
+    )
+    return resultado_storage["url"]
 
 
 async def exportar_paquete_zip(
+    cliente,
     clase_id: UUID,
     contenido_json: dict,
     recursos: list[dict],
     codigo_publico: str | None,
-    ruta_pdf: str | None,
-    ruta_pptx: str | None,
+    url_pdf: str | None,
+    url_pptx: str | None,
 ) -> str:
-    """Empaqueta la clase para compartirla por archivo descargable."""
-    RUTA_EXPORTACIONES.mkdir(parents=True, exist_ok=True)
-    ruta_zip = RUTA_EXPORTACIONES / f"{clase_id}.zip"
-
+    """
+    Empaqueta la clase (PDF, PPTX y demas recursos) en un ZIP, lo sube a
+    Storage y devuelve su URL publica. Los recursos (imagenes, PDF, PPTX)
+    ya viven en Storage como URLs http(s); se descargan en memoria para
+    incluirlos en el ZIP en vez de asumir que son rutas locales.
+    """
     recursos_manifest = []
     for indice, recurso in enumerate(recursos, start=1):
         recursos_manifest.append(
@@ -620,8 +678,8 @@ async def exportar_paquete_zip(
         "cuestionario": contenido_json.get("cuestionario", []),
         "tarea_hogar": contenido_json.get("tarea_hogar"),
         "archivos": {
-            "pdf": "clase.pdf" if ruta_pdf else None,
-            "powerpoint": "clase.pptx" if ruta_pptx else None,
+            "pdf": "clase.pdf" if url_pdf else None,
+            "powerpoint": "clase.pptx" if url_pptx else None,
         },
         "recursos": recursos_manifest,
     }
@@ -634,27 +692,33 @@ async def exportar_paquete_zip(
         f"Codigo alumno: {codigo_publico or 'No disponible'}\n"
     )
 
-    rutas_agregadas = set()
-    with ZipFile(ruta_zip, "w", compression=ZIP_DEFLATED) as archivo_zip:
-        archivo_zip.writestr("manifest.json", json.dumps(manifiesto, ensure_ascii=False, indent=2))
-        archivo_zip.writestr("README.txt", readme)
+    buffer = BytesIO()
+    async with httpx.AsyncClient(timeout=30) as cliente_http:
+        contenido_pdf = await _descargar_bytes(url_pdf or "", cliente_http)
+        contenido_pptx = await _descargar_bytes(url_pptx or "", cliente_http)
 
-        for ruta_origen, nombre_destino in ((ruta_pdf, "clase.pdf"), (ruta_pptx, "clase.pptx")):
-            if ruta_origen and Path(ruta_origen).exists():
-                archivo_zip.write(ruta_origen, nombre_destino)
-                rutas_agregadas.add(str(Path(ruta_origen).resolve()))
+        with ZipFile(buffer, "w", compression=ZIP_DEFLATED) as archivo_zip:
+            archivo_zip.writestr("manifest.json", json.dumps(manifiesto, ensure_ascii=False, indent=2))
+            archivo_zip.writestr("README.txt", readme)
 
-        for indice, recurso in enumerate(recursos, start=1):
-            ruta_recurso = Path(str(recurso.get("url_storage") or ""))
-            if not ruta_recurso.exists() or not ruta_recurso.is_file():
-                continue
-            ruta_resuelta = str(ruta_recurso.resolve())
-            if ruta_resuelta in rutas_agregadas:
-                continue
-            nombre = _nombre_recurso_zip(recurso, indice)
-            if not nombre:
-                continue
-            archivo_zip.write(ruta_recurso, nombre)
-            rutas_agregadas.add(ruta_resuelta)
+            if contenido_pdf:
+                archivo_zip.writestr("clase.pdf", contenido_pdf)
+            if contenido_pptx:
+                archivo_zip.writestr("clase.pptx", contenido_pptx)
 
-    return str(ruta_zip)
+            for indice, recurso in enumerate(recursos, start=1):
+                contenido_recurso = await _descargar_bytes(
+                    str(recurso.get("url_storage") or ""), cliente_http
+                )
+                if not contenido_recurso:
+                    continue
+                archivo_zip.writestr(_nombre_recurso_zip(recurso, indice), contenido_recurso)
+
+    resultado_storage = await guardar_recurso_docente(
+        cliente=cliente,
+        clase_id=clase_id,
+        nombre_archivo=f"clase-{clase_id}-paquete.zip",
+        contenido=buffer.getvalue(),
+        content_type="application/zip",
+    )
+    return resultado_storage["url"]

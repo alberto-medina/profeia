@@ -4,8 +4,7 @@ PDF y PowerPoint; los checkboxes de redes sociales quedan visibles pero
 deshabilitados como anticipo de MVP 2.0 (ver docs/05-mvp-2.0.md).
 """
 
-import os
-from pathlib import Path
+import webbrowser
 from urllib.parse import quote
 
 from kivy.core.clipboard import Clipboard
@@ -52,7 +51,7 @@ class PantallaExportar(Screen):
             self.ids.etiqueta_estado_compartir.text = "No hay codigo alumno para compartir."
             return
         url = f"https://wa.me/?text={quote(self._texto_compartir_codigo())}"
-        os.startfile(url)  # noqa: S606 - accion explicita del usuario en Windows
+        webbrowser.open(url)
         self.ids.etiqueta_estado_compartir.text = "Abriendo WhatsApp..."
 
     def al_presionar_exportar_pdf(self):
@@ -74,9 +73,9 @@ class PantallaExportar(Screen):
         app = MDApp.get_running_app()
         app.estado.recursos_generados["pdf"] = recurso_generado
         self.ids.boton_exportar_pdf.disabled = False
-        ruta_pdf = Path(recurso_generado.get("url_storage", ""))
-        self._ruta_pdf_generado = ruta_pdf
-        self._ruta_exportacion_generada = ruta_pdf
+        url_pdf = recurso_generado.get("url_storage", "")
+        self._url_pdf_generado = url_pdf
+        self._url_exportacion_generada = url_pdf
         if self._hay_recursos_para_paquete():
             self.ids.etiqueta_estado_pdf.text = "PDF listo con recursos visuales disponibles."
         else:
@@ -92,14 +91,11 @@ class PantallaExportar(Screen):
         print(f"[PantallaExportar] error PDF: {error}")
 
     def al_presionar_abrir_carpeta_pdf(self):
-        """Abre la carpeta donde se genero el PDF local."""
-        ruta_exportacion = getattr(self, "_ruta_exportacion_generada", None)
-        if not ruta_exportacion:
+        """Abre la exportacion generada (URL publica en Storage) en el navegador."""
+        url_exportacion = getattr(self, "_url_exportacion_generada", None)
+        if not url_exportacion:
             return
-
-        carpeta = ruta_exportacion.parent
-        if carpeta.exists():
-            os.startfile(carpeta)  # noqa: S606 - accion explicita del usuario en Windows
+        webbrowser.open(url_exportacion)
 
     def al_presionar_exportar_pptx(self):
         app = MDApp.get_running_app()
@@ -120,8 +116,7 @@ class PantallaExportar(Screen):
         app = MDApp.get_running_app()
         app.estado.recursos_generados["pptx"] = recurso_generado
         self.ids.boton_exportar_pptx.disabled = False
-        ruta_pptx = Path(recurso_generado.get("url_storage", ""))
-        self._ruta_exportacion_generada = ruta_pptx
+        self._url_exportacion_generada = recurso_generado.get("url_storage", "")
         self.ids.etiqueta_estado_pptx.text = "PowerPoint listo."
         self.ids.boton_abrir_carpeta_pdf.opacity = 1
         self.ids.boton_abrir_carpeta_pdf.disabled = False
@@ -152,8 +147,7 @@ class PantallaExportar(Screen):
         app = MDApp.get_running_app()
         app.estado.recursos_generados["zip"] = recurso_generado
         self.ids.boton_exportar_zip.disabled = False
-        ruta_zip = Path(recurso_generado.get("url_storage", ""))
-        self._ruta_exportacion_generada = ruta_zip
+        self._url_exportacion_generada = recurso_generado.get("url_storage", "")
         if self._hay_recursos_para_paquete():
             self.ids.etiqueta_estado_zip.text = "Paquete ZIP listo con recursos disponibles."
         else:
@@ -203,22 +197,22 @@ class PantallaExportar(Screen):
         self.ids.boton_copiar_codigo.disabled = not bool(app.estado.codigo_publico)
         self.ids.boton_compartir_whatsapp.disabled = not bool(app.estado.codigo_publico)
 
-        if not hasattr(self, "_ruta_pdf_generado"):
-            self._ruta_pdf_generado = None
-        if not hasattr(self, "_ruta_exportacion_generada"):
-            self._ruta_exportacion_generada = None
+        if not hasattr(self, "_url_pdf_generado"):
+            self._url_pdf_generado = None
+        if not hasattr(self, "_url_exportacion_generada"):
+            self._url_exportacion_generada = None
 
         if recurso_pdf and recurso_pdf.get("url_storage"):
-            self._ruta_pdf_generado = Path(recurso_pdf["url_storage"])
-            self._ruta_exportacion_generada = self._ruta_pdf_generado
+            self._url_pdf_generado = recurso_pdf["url_storage"]
+            self._url_exportacion_generada = self._url_pdf_generado
             self.ids.boton_abrir_carpeta_pdf.opacity = 1
             self.ids.boton_abrir_carpeta_pdf.disabled = False
         elif recurso_pptx and recurso_pptx.get("url_storage"):
-            self._ruta_exportacion_generada = Path(recurso_pptx["url_storage"])
+            self._url_exportacion_generada = recurso_pptx["url_storage"]
             self.ids.boton_abrir_carpeta_pdf.opacity = 1
             self.ids.boton_abrir_carpeta_pdf.disabled = False
         elif recurso_zip and recurso_zip.get("url_storage"):
-            self._ruta_exportacion_generada = Path(recurso_zip["url_storage"])
+            self._url_exportacion_generada = recurso_zip["url_storage"]
             self.ids.boton_abrir_carpeta_pdf.opacity = 1
             self.ids.boton_abrir_carpeta_pdf.disabled = False
         else:
@@ -266,8 +260,8 @@ class PantallaExportar(Screen):
         self.ids.etiqueta_estado_pptx.text = ""
         self.ids.etiqueta_estado_zip.text = ""
         self.ids.etiqueta_estado_compartir.text = ""
-        self._ruta_pdf_generado = None
-        self._ruta_exportacion_generada = None
+        self._url_pdf_generado = None
+        self._url_exportacion_generada = None
         self.ids.boton_abrir_carpeta_pdf.opacity = 0
         self.ids.boton_abrir_carpeta_pdf.disabled = True
         app.root.current = "inicio"

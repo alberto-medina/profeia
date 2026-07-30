@@ -75,7 +75,7 @@ async def exportar_clase_pdf(clase_id: UUID):
 
     contenido = _contenido_con_ultimo_apoyo(cliente, clase)
     recursos = _listar_recursos(cliente, clase_id)
-    url_storage = await exportar_pdf(clase_id, contenido, recursos)
+    url_storage = await exportar_pdf(cliente, clase_id, contenido, recursos)
 
     recurso = _guardar_recurso(cliente, clase_id, "pdf", url_storage)
     registrar_consumo_docente(cliente, clase["docente_id"], {"exportaciones_pdf": 1})
@@ -90,7 +90,7 @@ async def exportar_clase_pptx(clase_id: UUID):
     validar_cupo_docente(cliente, clase["docente_id"], {"exportaciones_pptx": 1})
 
     contenido = _contenido_con_ultimo_apoyo(cliente, clase)
-    url_storage = await exportar_pptx(clase_id, contenido)
+    url_storage = await exportar_pptx(cliente, clase_id, contenido)
 
     recurso = _guardar_recurso(cliente, clase_id, "pptx", url_storage)
     registrar_consumo_docente(cliente, clase["docente_id"], {"exportaciones_pptx": 1})
@@ -114,23 +114,20 @@ async def exportar_clase_zip(clase_id: UUID):
         for recurso in _listar_recursos(cliente, clase_id)
         if recurso.get("tipo") not in {"pdf", "pptx", "zip"}
     ]
-    ruta_pdf = await exportar_pdf(clase_id, contenido, recursos_existentes)
-    _guardar_recurso(cliente, clase_id, "pdf", ruta_pdf)
-    ruta_pptx = await exportar_pptx(clase_id, contenido)
-    _guardar_recurso(cliente, clase_id, "pptx", ruta_pptx)
+    url_pdf = await exportar_pdf(cliente, clase_id, contenido, recursos_existentes)
+    _guardar_recurso(cliente, clase_id, "pdf", url_pdf)
+    url_pptx = await exportar_pptx(cliente, clase_id, contenido)
+    _guardar_recurso(cliente, clase_id, "pptx", url_pptx)
 
-    recursos = [
-        recurso
-        for recurso in _listar_recursos(cliente, clase_id)
-        if recurso.get("tipo") != "zip"
-    ]
+    recursos = recursos_existentes
     url_storage = await exportar_paquete_zip(
+        cliente=cliente,
         clase_id=clase_id,
         contenido_json=contenido,
         recursos=recursos,
         codigo_publico=clase.get("codigo_publico"),
-        ruta_pdf=ruta_pdf,
-        ruta_pptx=ruta_pptx,
+        url_pdf=url_pdf,
+        url_pptx=url_pptx,
     )
 
     recurso = _guardar_recurso(cliente, clase_id, "zip", url_storage)
