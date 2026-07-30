@@ -12,7 +12,7 @@ version = 0.1.0
 # CRITICO: pinear Kivy y KivyMD. Sin estas versiones exactas, Buildozer
 # compila Kivy 2.3.1+ y rompe TextInput/teclado predictivo en Android
 # (misma leccion aprendida en Legal App).
-requirements = python3,kivy==2.2.1,kivymd==1.1.1,requests==2.32.3,pillow,pyjnius
+requirements = python3,kivy==2.2.1,kivymd==1.1.1,requests==2.32.3,pillow,pyjnius,certifi
 
 orientation = portrait
 fullscreen = 0

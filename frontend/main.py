@@ -8,6 +8,17 @@ KivyMD, y configuracion de ventana solo para desarrollo en Windows
 
 import os
 
+import certifi
+
+# En Android, el Python embebido no siempre toma el almacen de certificados
+# del sistema operativo para verificar HTTPS: sin esto, las imagenes que se
+# cargan por URL (AsyncImage, usado en la vista alumno para mostrar imagenes
+# generadas/subidas) fallan en silencio con error de verificacion SSL, aunque
+# las llamadas al backend con "requests" funcionen bien (esa libreria ya trae
+# su propio paquete de certificados via certifi). Fijar SSL_CERT_FILE antes
+# de cualquier conexion arregla ambos casos por igual.
+os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+
 from kivy.config import Config
 
 # Tamano de ventana de referencia para pruebas en Windows/Linux.
